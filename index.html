@@ -893,23 +893,110 @@
                 `;
 
                 // Display media (image or video)
-                if (post.data) {
-                    const isVideo = post.post_type === 'video' || 
-                                  (post.data && (post.data.includes('.mp4') || post.data.includes('.webm')));
+                if (post.data && post.data !== 'null') {
+                    // Try to parse as JSON array for multiple images
+                    let imageArray = [];
+                    try {
+                        imageArray = JSON.parse(post.data);
+                        if (!Array.isArray(imageArray)) {
+                            imageArray = [post.data]; // If not array, treat as single image URL
+                        }
+                    } catch (e) {
+                        // If parsing fails, treat as single image URL
+                        imageArray = [post.data];
+                    }
                     
-                    if (isVideo) {
+                    // Check if it's a video
+                    const isVideo = post.post_type === 'video' || 
+                                  (imageArray[0] && (imageArray[0].includes('.mp4') || imageArray[0].includes('.webm')));
+                    
+                    if (isVideo && imageArray.length === 1) {
                         content += `
                             <div class="post-media-container">
                                 <video class="post-main-video" controls>
-                                    <source src="${post.data}" type="video/mp4">
+                                    <source src="${imageArray[0]}" type="video/mp4">
                                     Your browser does not support the video tag.
                                 </video>
                             </div>
                         `;
-                    } else {
+                    } else if (imageArray.length === 1) {
+                        // Single image
                         content += `
                             <div class="post-media-container">
-                                <img src="${post.data}" alt="Post" class="post-main-image" onclick="openModal('${post.data}')">
+                                <img src="${imageArray[0]}" alt="Post" class="post-main-image" onclick="openModal('${imageArray[0]}')"
+                                     onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Crect fill=\'%23ddd\' width=\'100\' height=\'100\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' fill=\'%23999\'%3ENo Image%3C/text%3E%3C/svg%3E'">
+                            </div>
+                        `;
+                    } else if (imageArray.length === 2) {
+                        // Two images - side by side
+                        content += `
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                                <div class="post-media-container" style="height: 300px;">
+                                    <img src="${imageArray[0]}" alt="Post Image 1" class="post-main-image" 
+                                         style="height: 100%; object-fit: cover;" onclick="openModal('${imageArray[0]}')"
+                                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Crect fill=\'%23ddd\' width=\'100\' height=\'100\'/%3E%3C/svg%3E'">
+                                </div>
+                                <div class="post-media-container" style="height: 300px;">
+                                    <img src="${imageArray[1]}" alt="Post Image 2" class="post-main-image" 
+                                         style="height: 100%; object-fit: cover;" onclick="openModal('${imageArray[1]}')"
+                                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Crect fill=\'%23ddd\' width=\'100\' height=\'100\'/%3E%3C/svg%3E'">
+                                </div>
+                            </div>
+                        `;
+                    } else if (imageArray.length === 3) {
+                        // Three images layout
+                        content += `
+                            <div style="display: grid; gap: 10px; margin-bottom: 15px;">
+                                <div class="post-media-container" style="height: 300px;">
+                                    <img src="${imageArray[0]}" alt="Post Image 1" class="post-main-image" 
+                                         style="height: 100%; object-fit: cover;" onclick="openModal('${imageArray[0]}')"
+                                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Crect fill=\'%23ddd\' width=\'100\' height=\'100\'/%3E%3C/svg%3E'">
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                    <div class="post-media-container" style="height: 200px;">
+                                        <img src="${imageArray[1]}" alt="Post Image 2" class="post-main-image" 
+                                             style="height: 100%; object-fit: cover;" onclick="openModal('${imageArray[1]}')"
+                                             onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Crect fill=\'%23ddd\' width=\'100\' height=\'100\'/%3E%3C/svg%3E'">
+                                    </div>
+                                    <div class="post-media-container" style="height: 200px;">
+                                        <img src="${imageArray[2]}" alt="Post Image 3" class="post-main-image" 
+                                             style="height: 100%; object-fit: cover;" onclick="openModal('${imageArray[2]}')"
+                                             onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Crect fill=\'%23ddd\' width=\'100\' height=\'100\'/%3E%3C/svg%3E'">
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        // Four or more images - 2x2 grid
+                        content += `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">`;
+                        
+                        for (let i = 0; i < Math.min(4, imageArray.length); i++) {
+                            const isLast = i === 3 && imageArray.length > 4;
+                            content += `
+                                <div class="post-media-container" style="height: 200px; position: relative;">
+                                    <img src="${imageArray[i]}" alt="Post Image ${i+1}" class="post-main-image" 
+                                         style="height: 100%; object-fit: cover;" onclick="openModal('${imageArray[i]}')"
+                                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Crect fill=\'%23ddd\' width=\'100\' height=\'100\'/%3E%3C/svg%3E'">
+                                    ${isLast ? `
+                                        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; 
+                                                    background: rgba(0,0,0,0.6); display: flex; align-items: center; 
+                                                    justify-content: center; color: white; font-size: 32px; font-weight: bold;
+                                                    cursor: pointer; border-radius: 12px;">
+                                            +${imageArray.length - 4}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `;
+                        }
+                        
+                        content += `</div>`;
+                    }
+                    
+                    // Show image count
+                    if (imageArray.length > 1) {
+                        content += `
+                            <div style="text-align: center; color: #64748b; font-size: 14px; margin-top: 10px;">
+                                📷 ${imageArray.length} Photos
                             </div>
                         `;
                     }
