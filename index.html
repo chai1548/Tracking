@@ -120,6 +120,119 @@
             border-radius: 12px;
             color: #9ca3af;
         }
+
+        /* TRACKING INFO SECTION - NEW */
+        .tracking-info-section {
+            background: linear-gradient(135deg, #e0f2fe 0%, #bfdbfe 100%);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid #0284c7;
+        }
+        
+        .tracking-info-section h3 {
+            color: #075985;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 18px;
+        }
+        
+        .tracking-details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .tracking-detail-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .tracking-detail-label {
+            color: #64748b;
+            font-size: 12px;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .tracking-detail-value {
+            color: #1e293b;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .qr-code-container {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .qr-code-container img {
+            max-width: 200px;
+            height: auto;
+        }
+
+        /* TRACKING IMAGES GALLERY - NEW */
+        .tracking-images-section {
+            background: #fef3c7;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid #f59e0b;
+        }
+        
+        .tracking-images-section h3 {
+            color: #92400e;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 18px;
+        }
+        
+        .tracking-images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+        }
+        
+        .tracking-image-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .tracking-image-item:hover {
+            transform: scale(1.05);
+        }
+        
+        .tracking-image-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .tracking-image-meta {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.7));
+            color: white;
+            padding: 10px;
+            font-size: 11px;
+        }
         
         /* COMMENTS SECTION */
         .comments-section {
@@ -198,6 +311,54 @@
             color: #9ca3af;
         }
         
+        /* CUSTOMER FEEDBACK SECTION - NEW/UPDATED */
+        .customer-feedback-section {
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid #16a34a;
+        }
+        
+        .customer-feedback-section h3 {
+            color: #166534;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 18px;
+        }
+        
+        .feedback-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .feedback-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .feedback-rating {
+            color: #f59e0b;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+        
+        .feedback-text {
+            color: #374151;
+            line-height: 1.6;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .feedback-meta {
+            color: #9ca3af;
+            font-size: 11px;
+        }
+        
         /* ADMIN FEEDBACK SECTION */
         .admin-feedback-section {
             background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
@@ -243,359 +404,96 @@
             font-weight: bold;
         }
         
-        .admin-feedback-time {
-            color: #9ca3af;
-            font-size: 12px;
-        }
-        
-        .admin-feedback-text {
-            color: #1f2937;
-            line-height: 1.6;
-            margin-bottom: 10px;
-        }
-        
-        .admin-feedback-images {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 8px;
-            margin-top: 10px;
-        }
-        
-        .admin-feedback-img {
-            width: 100%;
-            height: 100px;
-            object-fit: cover;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        
-        .admin-feedback-img:hover {
-            transform: scale(1.05);
-        }
-        
-        .status-card {
-            background: #f7fafc;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-left: 4px solid #48bb78;
-        }
-        
-        .status-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            padding: 10px;
-            background: white;
-            border-radius: 8px;
-        }
-        
-        .status-item:last-child {
-            margin-bottom: 0;
-        }
-        
-        .status-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 15px;
-            font-size: 20px;
-        }
-        
-        .status-icon.active { background: #c6f6d5; }
-        .status-icon.location { background: #feebc8; }
-        .status-icon.time { background: #bee3f8; }
-        .status-icon.views { background: #e9d8fd; }
-        
-        .status-content {
-            flex: 1;
-        }
-        
-        .status-label {
-            font-size: 12px;
-            color: #718096;
-            margin-bottom: 4px;
-        }
-        
-        .status-value {
-            font-size: 16px;
-            color: #2d3748;
-            font-weight: 600;
-        }
-        
-        .location-notes {
-            background: #fffaf0;
-            border-left: 4px solid #ed8936;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .location-notes h4 {
-            color: #c05621;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        
-        .location-note-item {
-            background: white;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 8px;
-        }
-        
-        .location-note-text {
-            color: #2d3748;
-            margin-bottom: 4px;
-        }
-        
         .location-note-time {
             color: #9ca3af;
             font-size: 11px;
         }
         
-        .owner-controls {
-            background: #fff5f5;
-            border: 2px solid #fc8181;
+        .location-note-text {
+            color: #1f2937;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+        
+        .info-card {
+            background: #f8fafc;
             border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .owner-controls h3 {
-            color: #c53030;
-            margin-bottom: 15px;
-        }
-        
-        .toggle-section {
-            background: white;
             padding: 15px;
-            border-radius: 8px;
             margin-bottom: 15px;
         }
         
-        .toggle-header {
+        .info-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #e2e8f0;
         }
         
-        .toggle-switch {
-            position: relative;
-            width: 50px;
-            height: 26px;
-            background: #cbd5e0;
-            border-radius: 13px;
-            cursor: pointer;
-            transition: background 0.3s;
+        .info-row:last-child {
+            border-bottom: none;
         }
         
-        .toggle-switch.active {
-            background: #48bb78;
+        .info-label {
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 500;
         }
         
-        .toggle-slider {
-            position: absolute;
-            top: 3px;
-            left: 3px;
-            width: 20px;
-            height: 20px;
-            background: white;
-            border-radius: 50%;
-            transition: transform 0.3s;
-        }
-        
-        .toggle-switch.active .toggle-slider {
-            transform: translateX(24px);
-        }
-        
-        .location-note-form {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-        
-        .location-note-input {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            margin-bottom: 10px;
+        .info-value {
+            color: #1e293b;
             font-size: 14px;
-            resize: vertical;
-            min-height: 60px;
+            font-weight: 600;
         }
         
-        .image-gallery {
-            background: #f7fafc;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
         }
         
-        .image-gallery h3 {
-            color: #2d3748;
-            margin-bottom: 15px;
+        .status-active {
+            background: #d1fae5;
+            color: #065f46;
         }
         
-        .image-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 12px;
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
         }
         
-        .image-item img {
-            width: 100%;
-            height: 150px;
-            object-fit: cover;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        
-        .image-item img:hover {
-            transform: scale(1.05);
-        }
-        
-        .image-upload-section {
-            background: #f0fdf4;
-            border: 2px dashed #86efac;
-            border-radius: 12px;
-            padding: 30px;
+        .qr-code {
             text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 15px;
-        }
-        
-        .image-upload-section:hover {
-            background: #dcfce7;
-            border-color: #4ade80;
-        }
-        
-        .image-preview {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        
-        .preview-item {
-            position: relative;
-        }
-        
-        .preview-item img {
-            width: 100%;
-            height: 100px;
-            object-fit: cover;
-            border-radius: 8px;
-        }
-        
-        .preview-remove {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background: #ef4444;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        
-        .feedback-section {
-            background: #f0f9ff;
-            border-radius: 12px;
             padding: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .feedback-section h3 {
-            color: #0369a1;
-            margin-bottom: 15px;
-        }
-        
-        .feedback-form {
             background: white;
-            padding: 15px;
-            border-radius: 8px;
+            border-radius: 12px;
             margin-bottom: 15px;
         }
         
-        .rating-input {
+        .qr-code canvas {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        .action-buttons {
             display: flex;
-            gap: 5px;
-            margin-bottom: 10px;
-        }
-        
-        .star {
-            font-size: 32px;
-            color: #d1d5db;
-            cursor: pointer;
-            transition: color 0.2s;
-        }
-        
-        .star.active {
-            color: #fbbf24;
-        }
-        
-        .feedback-input {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            resize: vertical;
-            min-height: 80px;
-        }
-        
-        .feedback-list {
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        
-        .feedback-item {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-        
-        .feedback-rating {
-            color: #fbbf24;
-            font-size: 18px;
-            margin-bottom: 8px;
-        }
-        
-        .feedback-text {
-            color: #2d3748;
-            margin-bottom: 8px;
-        }
-        
-        .feedback-meta {
-            color: #9ca3af;
-            font-size: 12px;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
         }
         
         .btn {
-            width: 100%;
-            padding: 15px;
+            flex: 1;
+            min-width: 120px;
+            padding: 12px 20px;
             border: none;
-            border-radius: 12px;
-            font-size: 16px;
+            border-radius: 10px;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
-            margin-bottom: 10px;
         }
         
         .btn-primary {
@@ -603,70 +501,181 @@
             color: white;
         }
         
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
         .btn-secondary {
             background: #e2e8f0;
-            color: #4a5568;
+            color: #475569;
+        }
+        
+        .btn-secondary:hover {
+            background: #cbd5e1;
         }
         
         .btn-success {
-            background: #48bb78;
+            background: #10b981;
             color: white;
         }
         
-        .btn-upload {
-            background: #3b82f6;
-            color: white;
+        .btn-success:hover {
+            background: #059669;
         }
         
-        .btn-small {
-            padding: 10px;
-            font-size: 14px;
+        .upload-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 12px;
         }
         
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
+        .upload-section h4 {
+            color: #1e293b;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .file-input-wrapper input[type=file] {
+            font-size: 100px;
+            position: absolute;
             left: 0;
             top: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        .file-input-button {
+            display: inline-block;
+            padding: 12px 20px;
+            background: #667eea;
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .image-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .preview-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .preview-item img {
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.9);
+            object-fit: cover;
         }
         
-        .modal.active {
-            display: block;
-        }
-        
-        .modal-content {
-            margin: auto;
-            display: block;
-            max-width: 90%;
-            max-height: 90%;
-            margin-top: 50px;
-        }
-        
-        .modal-close {
+        .preview-item button {
             position: absolute;
-            top: 15px;
-            right: 35px;
-            color: #f1f1f1;
-            font-size: 40px;
-            font-weight: bold;
+            top: 5px;
+            right: 5px;
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .feedback-form {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+        
+        .star-rating {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        
+        .star {
+            font-size: 32px;
+            color: #cbd5e1;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .star:hover,
+        .star.active {
+            color: #f59e0b;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            animation: slideUp 0.3s;
+        }
+        
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            animation: slideUp 0.3s;
+        }
+        
+        .hidden {
+            display: none;
         }
         
         .loading {
             text-align: center;
-            padding: 40px;
+            padding: 60px 20px;
         }
         
         .spinner {
             border: 4px solid #f3f4f6;
             border-top: 4px solid #667eea;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             animation: spin 1s linear infinite;
             margin: 0 auto 20px;
         }
@@ -676,26 +685,59 @@
             100% { transform: rotate(360deg); }
         }
         
-        .hidden {
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .tracking-details-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .tracking-images-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+
+        /* Modal/Lightbox for full image view */
+        .modal {
             display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
         }
-        
-        .error {
-            background: #fee2e2;
-            color: #991b1b;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            text-align: center;
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        
-        .success {
-            background: #d1fae5;
-            color: #065f46;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            text-align: center;
+
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 40px;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -707,28 +749,23 @@
             <p>Track your order in real-time</p>
         </div>
         
-        <div id="app-content">
-            <div class="loading">
-                <div class="spinner"></div>
-                <p>Loading...</p>
-            </div>
-        </div>
+        <div id="app-content"></div>
     </div>
-    
-    <div id="imageModal" class="modal">
-        <span class="modal-close" onclick="closeImageModal()">&times;</span>
-        <img id="modalImage" class="modal-content" src="" alt="Full size image">
+
+    <!-- Image Modal -->
+    <div id="imageModal" class="modal" onclick="closeModal()">
+        <span class="close-modal">&times;</span>
+        <img class="modal-content" id="modalImage">
     </div>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    
     <script src="https://unpkg.com/html5-qrcode"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
     
     <script>
+        // Firebase config (replace with your config)
         const firebaseConfig = {
             apiKey: "AIzaSyB49vRPX8YaWuTP5GS3lsBDqdAaz_hJYAw",
             authDomain: "onlineshop-849c8.firebaseapp.com",
@@ -742,374 +779,290 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const storage = firebase.storage();
-        const auth = firebase.auth();
         
         let trackingId = null;
-        let html5QrCode = null;
+        let postData = {};
+        let currentUserId = 'user_' + Math.random().toString(36).substr(2, 9);
         let selectedFiles = [];
         let currentRating = 0;
-        let isOwner = false;
-        let currentUserId = null;
-        let postData = null;
+        let html5QrCode = null;
         
-        window.onload = function() {
-            auth.signInAnonymously().then(() => {
-                currentUserId = auth.currentUser.uid;
-                
-                const urlParams = new URLSearchParams(window.location.search);
-                trackingId = urlParams.get('id');
-                
-                if (trackingId) {
-                    loadTrackingData(trackingId);
-                } else {
-                    showQRScanner();
-                }
-            });
-        };
+        // Get tracking ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        trackingId = urlParams.get('id');
         
-        function loadTrackingData(id) {
+        if (trackingId) {
+            loadPostData(trackingId);
+        } else {
+            showQRScanner();
+        }
+        
+        function loadPostData(id) {
+            document.getElementById('app-content').innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading...</p></div>';
+            
             const trackingRef = database.ref('tracking/' + id);
             
-            trackingRef.once('value', (snapshot) => {
-             if (snapshot.exists()) {
+            trackingRef.on('value', (snapshot) => {
+                if (snapshot.exists()) {
                     postData = snapshot.val();
-                    isOwner = (currentUserId === postData.owner_uid);
-                    displayTrackingInfo(postData);
+                    renderPostView(id, postData);
                     updateTracking(id);
-                    loadLocationNotes(id);
-                    loadImages(id);
+                    loadComments(id);
                     loadFeedbacks(id);
                     loadAdminFeedback(id);
-                    loadPostData(id); // Load post image and comments
-                    
-                    trackingRef.on('value', (snap) => {
-                        if (snap.exists()) {
-                            postData = snap.val();
-                            displayTrackingInfo(snap.val());
-                        }
-                    });
+                    loadTrackingImages(id); // New function
                 } else {
-                    showError('Tracking ID မတွေ့ပါ / Tracking ID not found');
-                    setTimeout(() => showQRScanner(), 2000);
+                    document.getElementById('app-content').innerHTML = `
+                        <div style="text-align: center; padding: 40px;">
+                            <h2 style="color: #ef4444; margin-bottom: 20px;">⚠️ Tracking ID မရှိပါ</h2>
+                            <p style="color: #718096; margin-bottom: 20px;">သင်ရှာဖွေသည့် tracking information မတွေ့ပါ။</p>
+                            <button class="btn btn-primary" onclick="showQRScanner()">🔍 ထပ်ရှာမည်</button>
+                        </div>
+                    `;
                 }
+            }, (error) => {
+                showError('Failed to load data: ' + error.message);
             });
         }
         
-        // Load post image and comments from posts database
-        function loadPostData(trackingId) {
-            console.log('🔍 Loading post data for tracking ID:', trackingId);
+        function renderPostView(id, data) {
+            const isOwner = data.owner_uid === currentUserId;
             
-            // Strategy: Find post by matching tracking_id field in posts
-            database.ref('posts').orderByChild('tracking_id').equalTo(trackingId).once('value', (snapshot) => {
-                const container = document.getElementById('post-image-container');
-                if (!container) return;
-                
-                if (snapshot.exists()) {
-                    // Get the first (and should be only) matching post
-                    let postFound = false;
-                    snapshot.forEach((childSnapshot) => {
-                        if (!postFound) {
-                            const post = childSnapshot.val();
-                            const post_key = childSnapshot.key;
-                            
-                            console.log('✅ Post found with key:', post_key);
-                            console.log('📦 Post data:', post);
-                            console.log('📸 Available fields:', Object.keys(post));
-                            
-                            let html = '<div class="post-image-section"><h3>📸 Post Details</h3>';
-                            
-                            // CRITICAL: Try 'data' field first (from your database), then others
-                            const imageUrl = post.data || post.img || post.photo_url || 
-                                           post.image_url || post.imageUrl || post.photoUrl || 
-                                           post.picture || post.image || post.photo;
-                            
-                            console.log('🖼️ Image URL found:', imageUrl);
-                            
-                            if (imageUrl) {
-                                html += `<img src="${imageUrl}" class="post-main-image" onclick="openImageModal('${imageUrl}')" alt="Post Image">`;
-                            } else {
-                                console.warn('⚠️ No image field found in:', Object.keys(post));
-                                html += `<div class="post-no-image">📷 No image available<br><small style="color: #999;">Available fields: ${Object.keys(post).join(', ')}</small></div>`;
-                            }
-                            
-                            // Get description
-                            const desc = post.description || post.message || 
-                                        post.text || post.content || post.caption || '';
-                            
-                            if (desc) {
-                                html += `
-                                    <div class="post-description">
-                                        <h4>📝 Description:</h4>
-                                        <p>${desc}</p>
-                                    </div>
-                                `;
-                            }
-                            
-                            html += '</div>';
-                            container.innerHTML = html;
-                            
-                            // Load comments using the actual post_key
-                            loadComments(post_key);
-                            
-                            postFound = true;
-                        }
-                    });
-                } else {
-                    console.error('❌ No post found with tracking_id:', trackingId);
-                    container.innerHTML = `
-                        <div class="post-image-section">
-                            <div class="post-no-image">
-                                ⚠️ Post not found<br>
-                                <small style="color: #999;">Tracking ID: ${trackingId}</small>
+            let content = `
+                <!-- Post Image Section -->
+                <div class="post-image-section">
+                    <h3>📷 Post Image</h3>
+                    ${data.data ? `
+                        <img src="${data.data}" alt="Post" class="post-main-image" onclick="openModal('${data.data}')">
+                        ${data.description ? `
+                            <div class="post-description">
+                                <h4>Description:</h4>
+                                <p>${data.description}</p>
                             </div>
+                        ` : ''}
+                    ` : '<div class="post-no-image">No image available</div>'}
+                </div>
+
+                <!-- Tracking Information Section -->
+                <div class="tracking-info-section">
+                    <h3>🚚 Tracking Information</h3>
+                    
+                    <div class="tracking-details-grid">
+                        <div class="tracking-detail-card">
+                            <div class="tracking-detail-label">Tracking ID</div>
+                            <div class="tracking-detail-value">${id}</div>
                         </div>
-                    `;
-                }
-            }).catch(error => {
-                console.error('❌ Error loading post:', error);
-                const container = document.getElementById('post-image-container');
-                if (container) {
-                    container.innerHTML = `
-                        <div class="post-image-section">
-                            <div class="post-no-image">Error: ${error.message}</div>
+                        <div class="tracking-detail-card">
+                            <div class="tracking-detail-label">Status</div>
+                            <div class="tracking-detail-value">${data.status || 'Active'}</div>
                         </div>
-                    `;
-                }
-            });
+                        <div class="tracking-detail-card">
+                            <div class="tracking-detail-label">Views</div>
+                            <div class="tracking-detail-value">${data.views || 0} 👁️</div>
+                        </div>
+                        <div class="tracking-detail-card">
+                            <div class="tracking-detail-label">Location</div>
+                            <div class="tracking-detail-value">${data.last_location || 'Unknown'}</div>
+                        </div>
+                    </div>
+
+                    ${data.tracking_url ? `
+                        <div class="qr-code-container">
+                            <p style="color: #64748b; font-size: 12px; margin-bottom: 10px;">Scan QR Code</p>
+                            <div id="qr-code-${id}"></div>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="shareTracking()">📤 Share</button>
+                        ${isOwner ? '<button class="btn btn-secondary" onclick="updateStatus()">✏️ Update Status</button>' : ''}
+                    </div>
+                </div>
+            `;
+            
+            // Tracking Images section placeholder
+            content += '<div id="tracking-images-container"></div>';
+            
+            // Comments section
+            content += `
+                <div class="comments-section">
+                    <h3>💬 Comments</h3>
+                    <div id="comments-list"></div>
+                </div>
+            `;
+            
+            // Customer Feedback section
+            content += `
+                <div class="customer-feedback-section">
+                    <h3>⭐ Customer Feedback</h3>
+                    <div id="feedback-list"></div>
+                    
+                    <div class="feedback-form">
+                        <h4 style="margin-bottom: 15px;">Leave Your Feedback</h4>
+                        <div class="star-rating">
+                            ${[1,2,3,4,5].map(i => `<span class="star" onclick="setRating(${i})">★</span>`).join('')}
+                        </div>
+                        <textarea id="feedback-text" placeholder="Share your experience..."></textarea>
+                        <button class="btn btn-success" style="width: 100%; margin-top: 10px;" onclick="submitFeedback()">
+                            Submit Feedback
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            // Admin Feedback section
+            content += `
+                <div class="admin-feedback-section">
+                    <h3>📍 Location Updates</h3>
+                    <div id="admin-feedback-list"></div>
+                </div>
+            `;
+            
+            // Upload section for customers
+            if (data.image_upload_enabled !== false) {
+                content += `
+                    <div class="upload-section">
+                        <h4>📸 Upload Images</h4>
+                        <div class="file-input-wrapper">
+                            <label class="file-input-button">
+                                Choose Images
+                                <input type="file" multiple accept="image/*" onchange="handleFileSelect(event)">
+                            </label>
+                        </div>
+                        <div id="imagePreview" class="image-preview"></div>
+                        <button id="uploadBtn" class="btn btn-success hidden" style="width: 100%; margin-top: 10px;" onclick="uploadImages()">
+                            ⬆️ Upload Images
+                        </button>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('app-content').innerHTML = content;
+            
+            // Generate QR code if URL exists
+            if (data.tracking_url) {
+                setTimeout(() => {
+                    new QRCode(document.getElementById(`qr-code-${id}`), {
+                        text: data.tracking_url,
+                        width: 180,
+                        height: 180
+                    });
+                }, 100);
+            }
         }
-        
-        // Load comments from comments/{post_key}
-        function loadComments(post_id) {
-            database.ref('comments/' + post_id).on('value', (snapshot) => {
-                const container = document.getElementById('comments-container');
+
+        // NEW: Load tracking images
+        function loadTrackingImages(id) {
+            const imagesRef = database.ref('tracking_images/' + id);
+            
+            imagesRef.on('value', (snapshot) => {
+                const container = document.getElementById('tracking-images-container');
                 if (!container) return;
                 
                 if (snapshot.exists()) {
-                    let html = '<div class="comments-section"><h3>💬 Comments</h3>';
-                    
-                    const comments = [];
+                    const images = [];
                     snapshot.forEach((child) => {
-                        comments.push({ key: child.key, ...child.val() });
+                        images.push({ key: child.key, ...child.val() });
                     });
                     
-                    // Sort by timestamp (newest first)
-                    comments.sort((a, b) => (b.time || 0) - (a.time || 0));
+                    // Sort by uploaded_at (newest first)
+                    images.sort((a, b) => (b.uploaded_at || 0) - (a.uploaded_at || 0));
                     
-                    comments.forEach(comment => {
-                        const username = comment.name || comment.username || 'Anonymous';
-                        const initial = username.charAt(0).toUpperCase();
-                        const commentText = comment.comment || comment.text || comment.message || '';
-                        
+                    let html = `
+                        <div class="tracking-images-section">
+                            <h3>🖼️ Tracking Images (${images.length})</h3>
+                            <div class="tracking-images-grid">
+                    `;
+                    
+                    images.forEach(img => {
+                        const date = img.uploaded_at ? formatDate(new Date(img.uploaded_at)) : 'Unknown';
                         html += `
-                            <div class="comment-item">
-                                <div class="comment-header">
-                                    <div class="comment-avatar">${initial}</div>
-                                    <div class="comment-user-info">
-                                        <div class="comment-username">${username}</div>
-                                        <div class="comment-time">
-                                            ${comment.time ? formatDate(new Date(comment.time)) : 'Just now'}
-                                        </div>
-                                    </div>
+                            <div class="tracking-image-item" onclick="openModal('${img.url}')">
+                                <img src="${img.url}" alt="${img.name || 'Tracking image'}">
+                                <div class="tracking-image-meta">
+                                    ${date}
                                 </div>
-                                <div class="comment-text">${commentText}</div>
                             </div>
                         `;
                     });
                     
-                    html += '</div>';
-                    container.innerHTML = html;
-                } else {
-                    container.innerHTML = `
-                        <div class="comments-section">
-                            <h3>💬 Comments</h3>
-                            <div class="no-comments">No comments yet</div>
+                    html += `
+                            </div>
                         </div>
                     `;
-                }
-            });
-        }
-        
-        // Load admin feedback
-        function loadAdminFeedback(id) {
-            database.ref('admin_feedback/' + id).on('value', (snapshot) => {
-                const container = document.getElementById('admin-feedback-container');
-                if (!container) return;
-                
-                if (snapshot.exists()) {
-                    let html = '<div class="admin-feedback-section"><h3>👨‍💼 Admin Feedback</h3>';
                     
-                    const feedbacks = [];
-                    snapshot.forEach((child) => {
-                        feedbacks.push({ key: child.key, ...child.val() });
-                    });
-                    
-                    feedbacks.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-                    
-                    feedbacks.forEach(feedback => {
-                        html += `
-                            <div class="admin-feedback-item">
-                                <div class="admin-feedback-header">
-                                    <span class="admin-badge">ADMIN</span>
-                                    <span class="admin-feedback-time">
-                                        ${feedback.timestamp ? formatDate(new Date(feedback.timestamp)) : 'Just now'}
-                                    </span>
-                                </div>
-                                <div class="admin-feedback-text">${feedback.message || feedback.text || ''}</div>
-                        `;
-                        
-                        if (feedback.images && feedback.images.length > 0) {
-                            html += '<div class="admin-feedback-images">';
-                            feedback.images.forEach(imgUrl => {
-                                html += `<img src="${imgUrl}" class="admin-feedback-img" onclick="openImageModal('${imgUrl}')" alt="Admin feedback">`;
-                            });
-                            html += '</div>';
-                        }
-                        
-                        html += '</div>';
-                    });
-                    
-                    html += '</div>';
                     container.innerHTML = html;
                 } else {
                     container.innerHTML = '';
                 }
             });
         }
-        
-        function displayTrackingInfo(data) {
-            const content = `
-                <!-- POST IMAGE & DESCRIPTION -->
-                <div id="post-image-container"></div>
-                
-                <!-- COMMENTS SECTION -->
-                <div id="comments-container"></div>
-                
-                <!-- ADMIN FEEDBACK -->
-                <div id="admin-feedback-container"></div>
-                
-                <div class="status-card">
-                    <div class="status-item">
-                        <div class="status-icon active">✓</div>
-                        <div class="status-content">
-                            <div class="status-label">Status / အခြေအနေ</div>
-                            <div class="status-value">${data.status || 'Active'}</div>
-                        </div>
-                    </div>
-                    
-                    <div class="status-item">
-                        <div class="status-icon location">📍</div>
-                        <div class="status-content">
-                            <div class="status-label">Last Location / နောက်ဆုံးနေရာ</div>
-                            <div class="status-value">${data.last_location || 'Not available'}</div>
-                        </div>
-                    </div>
-                    
-                    <div class="status-item">
-                        <div class="status-icon time">⏰</div>
-                        <div class="status-content">
-                            <div class="status-label">Last Updated / နောက်ဆုံးအပ်ဒိတ်</div>
-                            <div class="status-value">${data.last_scan_at ? formatDate(new Date(data.last_scan_at)) : 'Never'}</div>
-                        </div>
-                    </div>
-                    
-                    <div class="status-item">
-                        <div class="status-icon views">👁️</div>
-                        <div class="status-content">
-                            <div class="status-label">Views / ကြည့်သူဦးရေ</div>
-                            <div class="status-value">${data.views || 0} times</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div id="location-notes-container"></div>
-                
-                ${isOwner ? `
-                    <div class="owner-controls">
-                        <h3>👨‍💼 Owner Controls</h3>
-                        
-                        <div class="toggle-section">
-                            <div class="toggle-header">
-                                <span>🖼️ Image Upload</span>
-                                <div class="toggle-switch ${data.image_upload_enabled !== false ? 'active' : ''}" 
-                                     onclick="toggleImageUpload()">
-                                    <div class="toggle-slider"></div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="location-note-form">
-                            <h4 style="margin-bottom: 10px; color: #2d3748;">📍 Send Location Note</h4>
-                            <textarea id="location-note-input" 
-                                      class="location-note-input" 
-                                      placeholder="ပစ္စည်းရောက်ရှိနေရာ / Location note..."></textarea>
-                            <button class="btn btn-success btn-small" onclick="sendLocationNote()">
-                                📤 Send Note
-                            </button>
-                        </div>
-                        
-                        <button class="btn btn-primary" onclick="updateStatus()">
-                            🔄 Update Status
-                        </button>
-                    </div>
-                ` : ''}
-                
-                <div id="image-gallery-container"></div>
-                
-                ${!isOwner && data.image_upload_enabled !== false ? `
-                    <div class="image-upload-section" onclick="document.getElementById('file-input').click()">
-                        <p style="margin-bottom: 10px; font-weight: 600; color: #2d3748;">📸 Upload Photos</p>
-                        <p style="font-size: 14px; color: #718096;">Click to select images</p>
-                        <input type="file" id="file-input" accept="image/*" multiple style="display: none;" 
-                               onchange="handleFileSelect(event)">
-                    </div>
-                    <div id="imagePreview" class="image-preview"></div>
-                    <button class="btn btn-upload ${selectedFiles.length === 0 ? 'hidden' : ''}" 
-                            id="upload-btn" onclick="uploadImages()">
-                        ⬆️ Upload ${selectedFiles.length} Image(s)
-                    </button>
-                ` : ''}
-                
-                <div class="feedback-section">
-                    <h3>💬 User Feedback</h3>
-                    
-                    <div class="feedback-form">
-                        <div class="rating-input" id="rating-stars">
-                            ${[1, 2, 3, 4, 5].map(i => 
-                                `<span class="star" data-rating="${i}" onclick="setRating(${i})">★</span>`
-                            ).join('')}
-                        </div>
-                        <textarea id="feedback-text" class="feedback-input" 
-                                  placeholder="Share your experience..."></textarea>
-                        <button class="btn btn-success btn-small" onclick="submitFeedback()">
-                            📝 Submit Feedback
-                        </button>
-                    </div>
-                    
-                    <div id="feedback-list" class="feedback-list"></div>
-                </div>
-                
-                <button class="btn btn-primary" onclick="shareTracking()">
-                    🔗 Share Tracking Link
-                </button>
-                
-                <button class="btn btn-secondary" onclick="showQRScanner()">
-                    🔍 Scan New QR Code
-                </button>
-            `;
-            
-            document.getElementById('app-content').innerHTML = content;
+
+        // Modal functions
+        function openModal(imageUrl) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            modal.classList.add('active');
+            modalImg.src = imageUrl;
+        }
+
+        function closeModal() {
+            document.getElementById('imageModal').classList.remove('active');
         }
         
-        function loadLocationNotes(id) {
-            const notesRef = database.ref('location_notes/' + id);
+        function loadComments(id) {
+            const commentsRef = database.ref('posts/' + id.replace('TRK', '-Ol-') + '/comments');
             
-            notesRef.on('value', (snapshot) => {
-                const container = document.getElementById('location-notes-container');
+            commentsRef.on('value', (snapshot) => {
+                const container = document.getElementById('comments-list');
                 if (!container) return;
                 
+                container.innerHTML = '';
+                
                 if (snapshot.exists()) {
-                    let notesHTML = '<div class="location-notes"><h4>📍 Location Updates</h4>';
+                    const comments = [];
+                    snapshot.forEach((child) => {
+                        comments.push({ key: child.key, ...child.val() });
+                    });
                     
+                    comments.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                    
+                    comments.forEach(comment => {
+                        const commentItem = document.createElement('div');
+                        commentItem.className = 'comment-item';
+                        
+                        const username = comment.username || 'Anonymous';
+                        const initial = username.charAt(0).toUpperCase();
+                        
+                        commentItem.innerHTML = `
+                            <div class="comment-header">
+                                <div class="comment-avatar">${initial}</div>
+                                <div class="comment-user-info">
+                                    <div class="comment-username">${username}</div>
+                                    <div class="comment-time">${comment.timestamp ? formatDate(new Date(comment.timestamp)) : 'Just now'}</div>
+                                </div>
+                            </div>
+                            <div class="comment-text">${comment.comment || comment.text || ''}</div>
+                        `;
+                        
+                        container.appendChild(commentItem);
+                    });
+                } else {
+                    container.innerHTML = '<p class="no-comments">No comments yet</p>';
+                }
+            });
+        }
+        
+        function loadAdminFeedback(id) {
+            const adminRef = database.ref('location_notes/' + id);
+            
+            adminRef.on('value', (snapshot) => {
+                const container = document.getElementById('admin-feedback-list');
+                if (!container) return;
+                
+                container.innerHTML = '';
+                
+                if (snapshot.exists()) {
                     const notes = [];
                     snapshot.forEach((child) => {
                         notes.push({ key: child.key, ...child.val() });
@@ -1118,144 +1071,79 @@
                     notes.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
                     
                     notes.forEach(note => {
-                        notesHTML += `
-                            <div class="location-note-item">
-                                <div class="location-note-text">${note.text}</div>
-                                <div class="location-note-time">
-                                    ${note.timestamp ? formatDate(new Date(note.timestamp)) : 'Just now'}
-                                </div>
+                        const noteItem = document.createElement('div');
+                        noteItem.className = 'admin-feedback-item';
+                        
+                        noteItem.innerHTML = `
+                            <div class="admin-feedback-header">
+                                <span class="admin-badge">ADMIN</span>
+                                <span class="location-note-time">${note.timestamp ? formatDate(new Date(note.timestamp)) : 'Just now'}</span>
                             </div>
+                            <div class="location-note-text">${note.note || note.text || ''}</div>
                         `;
+                        
+                        container.appendChild(noteItem);
                     });
-                    
-                    notesHTML += '</div>';
-                    container.innerHTML = notesHTML;
                 } else {
-                    container.innerHTML = '';
+                    container.innerHTML = '<p style="text-align: center; color: #9ca3af; padding: 20px;">No location updates yet</p>';
                 }
             });
-        }
-        
-        function sendLocationNote() {
-            const noteInput = document.getElementById('location-note-input');
-            const noteText = noteInput.value.trim();
-            
-            if (!noteText) {
-                showError('Please enter a location note');
-                return;
-            }
-            
-            const noteData = {
-                text: noteText,
-                timestamp: firebase.database.ServerValue.TIMESTAMP,
-                sender_id: currentUserId
-            };
-            
-            database.ref('location_notes/' + trackingId).push(noteData)
-                .then(() => {
-                    noteInput.value = '';
-                    showSuccess('Location note sent!');
-                })
-                .catch((error) => {
-                    showError('Failed to send note: ' + error.message);
-                });
-        }
-        
-        function toggleImageUpload() {
-            const newState = postData.image_upload_enabled === false;
-            
-            database.ref('tracking/' + trackingId).update({
-                image_upload_enabled: newState
-            }).then(() => {
-                showSuccess(`Image upload ${newState ? 'enabled' : 'disabled'}`);
-            });
-        }
-        
-        function loadImages(id) {
-            const imagesRef = database.ref('tracking_images/' + id);
-            
-            imagesRef.on('value', (snapshot) => {
-                const container = document.getElementById('image-gallery-container');
-                if (!container) return;
-                
-                if (snapshot.exists()) {
-                    let imagesHTML = '<div class="image-gallery"><h3>🖼️ Photos</h3><div class="image-grid">';
-                    
-                    snapshot.forEach((child) => {
-                        const imageData = child.val();
-                        imagesHTML += `
-                            <div class="image-item" onclick="openImageModal('${imageData.url}')">
-               <img src="${imageData.url}" alt="${imageData.name || 'Image'}">
-                            </div>
-                        `;
-                    });
-                    
-                    imagesHTML += '</div></div>';
-                    container.innerHTML = imagesHTML;
-                } else {
-                    container.innerHTML = '';
-                }
-            });
-        }
-        
-        function openImageModal(url) {
-            const modal = document.getElementById('imageModal');
-            const modalImg = document.getElementById('modalImage');
-            modal.classList.add('active');
-            modalImg.src = url;
-        }
-        
-        function closeImageModal() {
-            document.getElementById('imageModal').classList.remove('active');
         }
         
         function handleFileSelect(event) {
-            selectedFiles = Array.from(event.target.files);
-            displayImagePreviews();
-            document.getElementById('upload-btn').classList.remove('hidden');
-        }
-        
-        function displayImagePreviews() {
+            const files = Array.from(event.target.files);
+            selectedFiles = files;
+            
             const previewContainer = document.getElementById('imagePreview');
+            const uploadBtn = document.getElementById('uploadBtn');
+            
             previewContainer.innerHTML = '';
             
-            selectedFiles.forEach((file, index) => {
+            files.forEach((file, index) => {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    const previewItem = document.createElement('div');
-                    previewItem.className = 'preview-item';
-                    previewItem.innerHTML = `
+                    const div = document.createElement('div');
+                    div.className = 'preview-item';
+                    div.innerHTML = `
                         <img src="${e.target.result}" alt="Preview">
-                        <button class="preview-remove" onclick="removePreview(${index})">×</button>
+                        <button onclick="removeFile(${index})">×</button>
                     `;
-                    previewContainer.appendChild(previewItem);
+                    previewContainer.appendChild(div);
                 };
                 reader.readAsDataURL(file);
             });
-        }
-        
-        function removePreview(index) {
-            selectedFiles.splice(index, 1);
-            displayImagePreviews();
             
-            if (selectedFiles.length === 0) {
-                document.getElementById('upload-btn').classList.add('hidden');
+            if (files.length > 0) {
+                uploadBtn.classList.remove('hidden');
+                uploadBtn.textContent = `⬆️ Upload ${files.length} Image(s)`;
             } else {
-                document.getElementById('upload-btn').textContent = `⬆️ Upload ${selectedFiles.length} Image(s)`;
+                uploadBtn.classList.add('hidden');
             }
         }
         
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            const event = { target: { files: selectedFiles } };
+            handleFileSelect(event);
+        }
+        
         function uploadImages() {
-            if (selectedFiles.length === 0) return;
+            if (selectedFiles.length === 0) {
+                showError('Please select images first');
+                return;
+            }
             
-            const uploadBtn = document.getElementById('upload-btn');
+            const uploadBtn = document.getElementById('uploadBtn');
             uploadBtn.disabled = true;
             uploadBtn.textContent = 'Uploading...';
             
             let uploadCount = 0;
             
             selectedFiles.forEach((file) => {
-                const storageRef = storage.ref('tracking_images/' + trackingId + '/' + Date.now() + '_' + file.name);
+                const timestamp = Date.now();
+                const filename = `${trackingId}_${timestamp}_${file.name}`;
+                const storageRef = storage.ref('tracking_images/' + filename);
+                
                 const uploadTask = storageRef.put(file);
                 
                 uploadTask.then((snapshot) => {
@@ -1338,7 +1226,6 @@
                 const container = document.getElementById('feedback-list');
                 if (!container) return;
                 
-                // Clear container first
                 container.innerHTML = '';
                 
                 if (snapshot.exists()) {
@@ -1353,7 +1240,6 @@
                         const feedbackItem = document.createElement('div');
                         feedbackItem.className = 'feedback-item';
                         
-                        // Ensure rating is a valid number between 1-5
                         const rating = Math.min(5, Math.max(1, parseInt(feedback.rating) || 0));
                         const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
                         
