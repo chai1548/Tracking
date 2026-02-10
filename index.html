@@ -677,7 +677,7 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.95);
         }
 
         .modal.active {
@@ -688,24 +688,114 @@
 
         .modal-content {
             max-width: 90%;
-            max-height: 90%;
+            max-height: 85%;
+            border-radius: 8px;
+            transition: opacity 0.2s ease-in-out;
         }
 
         .close-modal {
             position: absolute;
             top: 20px;
-            right: 40px;
-            color: white;
+            right: 35px;
+            color: #f1f1f1;
             font-size: 40px;
             font-weight: bold;
             cursor: pointer;
+            z-index: 1001;
+            background: rgba(0,0,0,0.5);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            transition: background 0.3s;
+        }
+        
+        .close-modal:hover {
+            background: rgba(0,0,0,0.7);
+        }
+
+        .modal-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            font-size: 30px;
+            padding: 20px 15px;
+            cursor: pointer;
+            z-index: 1001;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .modal-nav:hover {
+            background: rgba(0,0,0,0.7);
+        }
+
+        .modal-nav:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .modal-nav.prev {
+            left: 20px;
+        }
+
+        .modal-nav.next {
+            right: 20px;
+        }
+
+        .modal-counter {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 1001;
+        }
+
+        .modal-save-btn {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: all 0.2s;
+        }
+
+        .modal-save-btn:hover {
+            transform: translateX(-50%) scale(1.05);
+        }
+
+        .modal-save-btn:active {
+            transform: translateX(-50%) scale(0.95);
         }
         
         @media (max-width: 768px) {
             .container {
                 padding: 20px;
             }
-            
+                
             .tracking-details-grid {
                 grid-template-columns: 1fr;
             }
@@ -736,9 +826,15 @@
     </div>
 
     <!-- Image Modal -->
-    <div id="imageModal" class="modal" onclick="closeModal()">
-        <span class="close-modal">&times;</span>
+    <div id="imageModal" class="modal" onclick="event.target === this && closeModal()">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <button class="modal-nav prev" id="prevBtn" onclick="navigateGallery(-1)">‹</button>
+        <button class="modal-nav next" id="nextBtn" onclick="navigateGallery(1)">›</button>
         <img class="modal-content" id="modalImage">
+        <div class="modal-counter" id="modalCounter"></div>
+        <button class="modal-save-btn" onclick="saveCurrentImage()">
+            💾 Save Image
+        </button>
     </div>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -906,6 +1002,9 @@
                         imageArray = [post.data];
                     }
                     
+                    // Store globally for modal access
+                    window.currentPostImages = imageArray;
+                    
                     // Check if it's a video
                     const isVideo = post.post_type === 'video' || 
                                   (imageArray[0] && (imageArray[0].includes('.mp4') || imageArray[0].includes('.webm')));
@@ -923,7 +1022,7 @@
                         // Single image
                         content += `
                             <div class="post-media-container">
-                                <img src="${imageArray[0]}" alt="Post" class="post-main-image" onclick="openModal('${imageArray[0]}')"
+                                <img src="${imageArray[0]}" alt="Post" class="post-main-image" onclick="openModal('${imageArray[0]}', window.currentPostImages, 0)"
                                      onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Crect fill=\'%23ddd\' width=\'100\' height=\'100\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' fill=\'%23999\'%3ENo Image%3C/text%3E%3C/svg%3E'">
                             </div>
                         `;
@@ -933,12 +1032,12 @@
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
                                 <div class="post-media-container" style="height: 300px;">
                                     <img src="${imageArray[0]}" alt="Post Image 1" class="post-main-image" 
-                                         style="height: 100%; object-fit: cover;" onclick="openModal('${imageArray[0]}')"
+                                         style="height: 100%; object-fit: cover;" onclick="openModal('${imageArray[0]}', window.currentPostImages, 0)"
                                          onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Crect fill=\'%23ddd\' width=\'100\' height=\'100\'/%3E%3C/svg%3E'">
                                 </div>
                                 <div class="post-media-container" style="height: 300px;">
                                     <img src="${imageArray[1]}" alt="Post Image 2" class="post-main-image" 
-                                         style="height: 100%; object-fit: cover;" onclick="openModal('${imageArray[1]}')"
+                                         style="height: 100%; object-fit: cover;" onclick="openModal('${imageArray[1]}', window.currentPostImages, 1)"
                                          onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Crect fill=\'%23ddd\' width=\'100\' height=\'100\'/%3E%3C/svg%3E'">
                                 </div>
                             </div>
@@ -949,18 +1048,18 @@
                             <div style="display: grid; gap: 10px; margin-bottom: 15px;">
                                 <div class="post-media-container" style="height: 300px;">
                                     <img src="${imageArray[0]}" alt="Post Image 1" class="post-main-image" 
-                                         style="height: 100%; object-fit: cover;" onclick="openModal('${imageArray[0]}')"
+                                         style="height: 100%; object-fit: cover;" onclick="openModal('${imageArray[0]}', window.currentPostImages, 0)"
                                          onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Crect fill=\'%23ddd\' width=\'100\' height=\'100\'/%3E%3C/svg%3E'">
                                 </div>
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                                     <div class="post-media-container" style="height: 200px;">
                                         <img src="${imageArray[1]}" alt="Post Image 2" class="post-main-image" 
-                                             style="height: 100%; object-fit: cover;" onclick="openModal('${imageArray[1]}')"
+                                             style="height: 100%; object-fit: cover;" onclick="openModal('${imageArray[1]}', window.currentPostImages, 1)"
                                              onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Crect fill=\'%23ddd\' width=\'100\' height=\'100\'/%3E%3C/svg%3E'">
                                     </div>
                                     <div class="post-media-container" style="height: 200px;">
                                         <img src="${imageArray[2]}" alt="Post Image 3" class="post-main-image" 
-                                             style="height: 100%; object-fit: cover;" onclick="openModal('${imageArray[2]}')"
+                                             style="height: 100%; object-fit: cover;" onclick="openModal('${imageArray[2]}', window.currentPostImages, 2)"
                                              onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Crect fill=\'%23ddd\' width=\'100\' height=\'100\'/%3E%3C/svg%3E'">
                                     </div>
                                 </div>
@@ -975,13 +1074,14 @@
                             content += `
                                 <div class="post-media-container" style="height: 200px; position: relative;">
                                     <img src="${imageArray[i]}" alt="Post Image ${i+1}" class="post-main-image" 
-                                         style="height: 100%; object-fit: cover;" onclick="openModal('${imageArray[i]}')"
+                                         style="height: 100%; object-fit: cover;" onclick="openModal('${imageArray[i]}', window.currentPostImages, ${i})"
                                          onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Crect fill=\'%23ddd\' width=\'100\' height=\'100\'/%3E%3C/svg%3E'">
                                     ${isLast ? `
                                         <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; 
                                                     background: rgba(0,0,0,0.6); display: flex; align-items: center; 
                                                     justify-content: center; color: white; font-size: 32px; font-weight: bold;
-                                                    cursor: pointer; border-radius: 12px;">
+                                                    cursor: pointer; border-radius: 12px;" 
+                                                    onclick="openModal('${imageArray[i]}', window.currentPostImages, ${i})">
                                             +${imageArray.length - 4}
                                         </div>
                                     ` : ''}
@@ -1071,7 +1171,7 @@
             // Tracking Images section placeholder
             content += '<div id="tracking-images-container"></div>';
             
-            // Comments section (only if post exists)
+// Comments section (only if post exists)
             if (pKey) {
                 content += `
                     <div class="comments-section">
@@ -1188,15 +1288,150 @@
         }
 
         // Modal functions
-        function openModal(imageUrl) {
+        let currentGalleryImages = [];
+        let currentGalleryIndex = 0;
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        function openModal(imageUrl, imagesArray = null, startIndex = 0) {
             const modal = document.getElementById('imageModal');
             const modalImg = document.getElementById('modalImage');
+            
+            // Set up gallery
+            if (imagesArray && Array.isArray(imagesArray) && imagesArray.length > 0) {
+                currentGalleryImages = imagesArray;
+                currentGalleryIndex = startIndex;
+            } else {
+                currentGalleryImages = [imageUrl];
+                currentGalleryIndex = 0;
+            }
+            
+            // Display current image
+            modalImg.src = currentGalleryImages[currentGalleryIndex];
             modal.classList.add('active');
-            modalImg.src = imageUrl;
+            
+            // Update counter and navigation buttons
+            updateGalleryUI();
+            
+            // Add keyboard navigation
+            document.addEventListener('keydown', handleKeyNavigation);
+            
+            // Add touch/swipe support
+            modalImg.addEventListener('touchstart', handleTouchStart, { passive: true });
+            modalImg.addEventListener('touchend', handleTouchEnd, { passive: true });
         }
 
         function closeModal() {
-            document.getElementById('imageModal').classList.remove('active');
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            
+            modal.classList.remove('active');
+            document.removeEventListener('keydown', handleKeyNavigation);
+            modalImg.removeEventListener('touchstart', handleTouchStart);
+            modalImg.removeEventListener('touchend', handleTouchEnd);
+        }
+
+        function handleTouchStart(e) {
+            touchStartX = e.changedTouches[0].screenX;
+        }
+
+        function handleTouchEnd(e) {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }
+
+        function handleSwipe() {
+            const swipeThreshold = 50; // minimum distance for swipe
+            const diff = touchStartX - touchEndX;
+            
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0) {
+                    // Swipe left - next image
+                    navigateGallery(1);
+                } else {
+                    // Swipe right - previous image
+                    navigateGallery(-1);
+                }
+            }
+        }
+
+        function navigateGallery(direction) {
+            currentGalleryIndex += direction;
+            
+            // Wrap around
+            if (currentGalleryIndex < 0) {
+                currentGalleryIndex = currentGalleryImages.length - 1;
+            } else if (currentGalleryIndex >= currentGalleryImages.length) {
+                currentGalleryIndex = 0;
+            }
+            
+            // Update image with fade effect
+            const modalImg = document.getElementById('modalImage');
+            modalImg.style.opacity = '0.5';
+            
+            setTimeout(() => {
+                modalImg.src = currentGalleryImages[currentGalleryIndex];
+                modalImg.style.opacity = '1';
+            }, 150);
+            
+            updateGalleryUI();
+        }
+
+        function updateGalleryUI() {
+            const counter = document.getElementById('modalCounter');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            // Update counter
+            if (currentGalleryImages.length > 1) {
+                counter.textContent = `${currentGalleryIndex + 1} / ${currentGalleryImages.length}`;
+                counter.style.display = 'block';
+            } else {
+                counter.style.display = 'none';
+            }
+            
+            // Show/hide navigation buttons
+            if (currentGalleryImages.length > 1) {
+                prevBtn.style.display = 'block';
+                nextBtn.style.display = 'block';
+            } else {
+                prevBtn.style.display = 'none';
+                nextBtn.style.display = 'none';
+            }
+        }
+
+        function handleKeyNavigation(e) {
+            if (e.key === 'ArrowLeft') {
+                navigateGallery(-1);
+            } else if (e.key === 'ArrowRight') {
+                navigateGallery(1);
+            } else if (e.key === 'Escape') {
+                closeModal();
+            }
+        }
+
+        function saveCurrentImage() {
+            const currentImageUrl = currentGalleryImages[currentGalleryIndex];
+            
+            // Create a temporary anchor element to download
+            fetch(currentImageUrl)
+                .then(response => response.blob())
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `image_${currentGalleryIndex + 1}_${Date.now()}.jpg`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                    showSuccess('Image saved successfully! 💾');
+                })
+                .catch(error => {
+                    // Fallback: open in new tab
+                    window.open(currentImageUrl, '_blank');
+                    showSuccess('Image opened in new tab! You can save it from there. 💾');
+                });
         }
         
         function loadComments(postKey) {
