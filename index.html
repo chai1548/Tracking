@@ -25,10 +25,12 @@
             background: white;
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 500px;
+            max-width: 600px;
             width: 100%;
             padding: 40px;
             animation: slideUp 0.5s ease-out;
+            max-height: 90vh;
+            overflow-y: auto;
         }
         
         @keyframes slideUp {
@@ -134,24 +136,309 @@
             font-weight: 600;
         }
         
-        .qr-section {
-            text-align: center;
-            padding: 20px;
-            background: #f7fafc;
+        /* Owner Controls */
+        .owner-controls {
+            background: #fff5f5;
+            border: 2px solid #fc8181;
             border-radius: 12px;
+            padding: 20px;
             margin-bottom: 20px;
         }
         
-        .qr-section h3 {
-            color: #2d3748;
+        .owner-controls h3 {
+            color: #c53030;
             margin-bottom: 15px;
-            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
-        #qr-reader {
+        .toggle-section {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .toggle-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 26px;
+            background: #cbd5e0;
+            border-radius: 13px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .toggle-switch.active {
+            background: #48bb78;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+        
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(24px);
+        }
+        
+        .location-note-form {
+            margin-top: 10px;
+        }
+        
+        .location-note-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 60px;
+        }
+        
+        .location-note-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        /* Location Notes Display */
+        .location-notes {
+            background: #fffaf0;
+            border-left: 4px solid #ed8936;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .location-notes h4 {
+            color: #c05621;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .location-note-item {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+        
+        .location-note-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .location-note-text {
+            color: #2d3748;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+        
+        .location-note-time {
+            color: #718096;
+            font-size: 12px;
+        }
+        
+        /* Image Gallery */
+        .image-gallery {
+            margin-bottom: 20px;
+        }
+        
+        .image-gallery h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+        }
+        
+        .image-item {
+            position: relative;
+            aspect-ratio: 1;
             border-radius: 8px;
             overflow: hidden;
-            margin: 0 auto;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .image-item:hover {
+            transform: scale(1.05);
+        }
+        
+        .image-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .image-upload-section {
+            background: #f7fafc;
+            border: 2px dashed #cbd5e0;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .image-upload-section:hover {
+            border-color: #667eea;
+            background: #edf2f7;
+        }
+        
+        .image-upload-section.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        
+        .image-preview {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        
+        .preview-item {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .preview-remove {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #f56565;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        /* Feedback Section */
+        .feedback-section {
+            background: #f0fff4;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .feedback-section h3 {
+            color: #22543d;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .feedback-form {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .rating-input {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+            font-size: 28px;
+        }
+        
+        .star {
+            cursor: pointer;
+            color: #cbd5e0;
+            transition: color 0.2s;
+        }
+        
+        .star.active {
+            color: #fbbf24;
+        }
+        
+        .feedback-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .feedback-input:focus {
+            outline: none;
+            border-color: #48bb78;
+        }
+        
+        .feedback-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .feedback-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 3px solid #48bb78;
+        }
+        
+        .feedback-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .feedback-rating {
+            color: #fbbf24;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        
+        .feedback-text {
+            color: #2d3748;
+            font-size: 14px;
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        
+        .feedback-meta {
+            color: #718096;
+            font-size: 12px;
         }
         
         .btn {
@@ -191,6 +478,15 @@
             color: white;
         }
         
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #38a169;
+        }
+        
         .btn-upload {
             background: #48bb78;
             color: white;
@@ -208,6 +504,12 @@
         
         .btn-danger:hover {
             background: #e53e3e;
+        }
+        
+        .btn-small {
+            padding: 8px 12px;
+            font-size: 14px;
+            width: auto;
         }
         
         .loading {
@@ -246,161 +548,64 @@
             border-radius: 8px;
             margin-bottom: 20px;
             text-align: center;
-            animation: fadeIn 0.3s ease;
         }
         
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        .tracking-id {
-            background: #edf2f7;
-            padding: 10px 15px;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 14px;
-            color: #2d3748;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        /* Image picker styles */
-        .image-picker {
-            margin: 20px 0;
-        }
-        
-        .image-preview {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 10px;
-            margin-top: 15px;
-        }
-        
-        .preview-item {
-            position: relative;
-            border-radius: 8px;
-            overflow: hidden;
-            aspect-ratio: 1;
-            background: #f7fafc;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-        }
-        
-        .preview-item:hover {
-            transform: scale(1.05);
-        }
-        
-        .preview-item img {
+        /* Image Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
             width: 100%;
             height: 100%;
-            object-fit: cover;
-        }
-        
-        .preview-item .remove-btn {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background: rgba(239, 68, 68, 0.9);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            cursor: pointer;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
+            background: rgba(0, 0, 0, 0.9);
             justify-content: center;
-            transition: all 0.2s ease;
+            align-items: center;
         }
         
-        .preview-item .remove-btn:hover {
-            background: #e53e3e;
-            transform: scale(1.1);
+        .modal.active {
+            display: flex;
         }
         
-        .file-input-wrapper {
-            position: relative;
-            overflow: hidden;
-            display: inline-block;
-            width: 100%;
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
         }
         
-        .file-input-wrapper input[type=file] {
+        .modal-close {
             position: absolute;
-            left: -9999px;
+            top: 20px;
+            right: 40px;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
         }
         
-        .file-input-label {
-            display: block;
-            width: 100%;
-            padding: 15px;
-            background: #48bb78;
-            color: white;
-            border-radius: 8px;
+        .qr-section {
             text-align: center;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-        
-        .file-input-label:hover {
-            background: #38a169;
-            transform: translateY(-2px);
-        }
-        
-        .upload-progress {
-            margin-top: 10px;
-            background: #edf2f7;
-            border-radius: 8px;
-            overflow: hidden;
-            display: none;
-        }
-        
-        .upload-progress.active {
-            display: block;
-        }
-        
-        .progress-bar {
-            height: 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            transition: width 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        
-        .scan-options {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 12px;
             margin-bottom: 20px;
         }
         
-        .qr-upload-section {
-            background: #f7fafc;
-            padding: 20px;
-            border-radius: 12px;
-            margin-top: 15px;
-        }
-        
-        .qr-upload-section h4 {
+        .qr-section h3 {
             color: #2d3748;
-            margin-bottom: 10px;
-            font-size: 16px;
+            margin-bottom: 15px;
+            font-size: 18px;
         }
         
-        #qr-image-preview {
-            max-width: 100%;
-            max-height: 300px;
-            margin: 10px auto;
-            display: none;
+        #qr-reader {
             border-radius: 8px;
+            overflow: hidden;
+            margin: 0 auto;
+        }
+        
+        .hidden {
+            display: none;
         }
     </style>
 </head>
@@ -409,31 +614,36 @@
         <div class="header">
             <div class="tracking-icon">📦</div>
             <h1>Post Tracking</h1>
-            <p>Real-time tracking system</p>
+            <p>Track your order in real-time</p>
         </div>
         
         <div id="app-content">
             <div class="loading">
                 <div class="spinner"></div>
-                <p>Loading tracking information...</p>
+                <p>Loading...</p>
             </div>
         </div>
     </div>
     
+    <!-- Image Modal -->
+    <div id="imageModal" class="modal">
+        <span class="modal-close" onclick="closeImageModal()">&times;</span>
+        <img id="modalImage" class="modal-content" src="" alt="Full size image">
+    </div>
+    
     <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     
-    <!-- QR Code Scanner -->
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-    
-    <!-- QR Code Reader (for image upload) -->
+    <!-- QR Code Libraries -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     
     <script>
-        // Firebase Configuration - YOUR ACTUAL CONFIG
-        const firebaseConfig = {
+        // Firebase Configuration
+const firebaseConfig = {
             apiKey: "AIzaSyB49vRPX8YaWuTP5GS3lsBDqdAaz_hJYAw",
             authDomain: "onlineshop-849c8.firebaseapp.com",
             databaseURL: "https://onlineshop-849c8.firebaseio.com",
@@ -443,56 +653,69 @@
             appId: "1:883512833370:android:185171fa84296e0dafef63"
         };
         
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const storage = firebase.storage();
+        const auth = firebase.auth();
         
-        // Get tracking ID from URL
-        const urlParams = new URLSearchParams(window.location.search);
-        let trackingId = urlParams.get('id');
-        
-        // Selected files for upload
-        let selectedFiles = [];
+        let trackingId = null;
         let html5QrCode = null;
+        let selectedFiles = [];
+        let currentRating = 0;
+        let isOwner = false;
+        let currentUserId = null;
+        let postData = null;
         
-        if (trackingId) {
-            loadTrackingData(trackingId);
-        } else {
-            showQRScanner();
-        }
+        // Initialize
+        window.onload = function() {
+            auth.signInAnonymously().then(() => {
+                currentUserId = auth.currentUser.uid;
+                
+                const urlParams = new URLSearchParams(window.location.search);
+                trackingId = urlParams.get('id');
+                
+                if (trackingId) {
+                    loadTrackingData(trackingId);
+                } else {
+                    showQRScanner();
+                }
+            });
+        };
         
         function loadTrackingData(id) {
             const trackingRef = database.ref('tracking/' + id);
             
-            trackingRef.on('value', (snapshot) => {
+            trackingRef.once('value', (snapshot) => {
                 if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    displayTrackingInfo(data);
+                    postData = snapshot.val();
+                    isOwner = (currentUserId === postData.owner_uid);
+                    displayTrackingInfo(postData);
                     updateTracking(id);
+                    loadLocationNotes(id);
+                    loadImages(id);
+                    loadFeedbacks(id);
+                    
+                    // Real-time updates
+                    trackingRef.on('value', (snap) => {
+                        if (snap.exists()) {
+                            postData = snap.val();
+                            displayTrackingInfo(snap.val());
+                        }
+                    });
                 } else {
                     showError('Tracking ID မတွေ့ပါ / Tracking ID not found');
+                    setTimeout(() => showQRScanner(), 2000);
                 }
-            }, (error) => {
-                showError('Failed to load tracking data: ' + error.message);
             });
         }
         
         function displayTrackingInfo(data) {
-            const now = new Date();
-            const createdAt = new Date(data.created_at);
-            const lastScan = data.last_scan_at ? new Date(data.last_scan_at) : null;
-            
             const content = `
-                <div class="tracking-id">
-                    Tracking ID: ${data.tracking_id}
-                </div>
-                
                 <div class="status-card">
                     <div class="status-item">
                         <div class="status-icon active">✓</div>
                         <div class="status-content">
-                            <div class="status-label">Status</div>
+                            <div class="status-label">Status / အခြေအနေ</div>
                             <div class="status-value">${data.status || 'Active'}</div>
                         </div>
                     </div>
@@ -500,176 +723,383 @@
                     <div class="status-item">
                         <div class="status-icon location">📍</div>
                         <div class="status-content">
-                            <div class="status-label">Location</div>
-                            <div class="status-value">${data.last_location || 'Not scanned yet'}</div>
+                            <div class="status-label">Last Location / နောက်ဆုံးနေရာ</div>
+                            <div class="status-value">${data.last_location || 'Not available'}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="status-item">
+                        <div class="status-icon time">⏰</div>
+                        <div class="status-content">
+                            <div class="status-label">Last Updated / နောက်ဆုံးအပ်ဒိတ်</div>
+                            <div class="status-value">${data.last_scan_at ? formatDate(new Date(data.last_scan_at)) : 'Never'}</div>
                         </div>
                     </div>
                     
                     <div class="status-item">
                         <div class="status-icon views">👁️</div>
-                        <div class="status-content">
-                            <div class="status-label">Total Views</div>
-                            <div class="status-value">${data.views || 0}</div>
-                        </div>
-                    </div>
-                    
-                    <div class="status-item">
-                        <div class="status-icon time">🕐</div>
-                        <div class="status-content">
-                            <div class="status-label">Last Scan</div>
-                            <div class="status-value">${lastScan ? formatDate(lastScan) : 'No scans yet'}</div>
+                            <div class="status-content">
+                            <div class="status-label">Views / ကြည့်သူဦးရေ</div>
+                            <div class="status-value">${data.views || 0} times</div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Image Upload Section -->
-                <div class="image-picker">
-                    <div class="file-input-wrapper">
-                        <input type="file" id="imageInput" accept="image/*" multiple onchange="handleFileSelect(event)">
-                        <label for="imageInput" class="file-input-label">
-                            📷 Upload ပုံများ / Upload Images
-                        </label>
-                    </div>
-                    
-                    <div class="upload-progress" id="uploadProgress">
-                        <div class="progress-bar" id="progressBar" style="width: 0%;">0%</div>
-                    </div>
-                    
-                    <div class="image-preview" id="imagePreview"></div>
-                </div>
+                <!-- Location Notes -->
+                <div id="location-notes-container"></div>
                 
-                <div class="success">
-                    ✓ Tracking information updated in real-time
+                <!-- Owner Controls -->
+                ${isOwner ? `
+                    <div class="owner-controls">
+                        <h3>👨‍💼 Owner Controls</h3>
+                        
+                        <!-- Image Upload Toggle -->
+                        <div class="toggle-section">
+                            <div class="toggle-header">
+                                <span>🖼️ Image Upload</span>
+                                <div class="toggle-switch ${data.image_upload_enabled !== false ? 'active' : ''}" 
+                                     onclick="toggleImageUpload()">
+                                    <div class="toggle-slider"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Location Note Form -->
+                        <div class="location-note-form">
+                            <h4 style="margin-bottom: 10px; color: #2d3748;">📍 Send Location Note</h4>
+                            <textarea id="location-note-input" 
+                                      class="location-note-input" 
+                                      placeholder="ပစ္စည်းရောက်ရှိနေရာ / Location note..."></textarea>
+                            <button class="btn btn-success btn-small" onclick="sendLocationNote()">
+                                📤 Send Note
+                            </button>
+                        </div>
+                        
+                        <!-- Status Update -->
+                        <button class="btn btn-primary" onclick="updateStatus()">
+                            🔄 Update Status
+                        </button>
+                    </div>
+                ` : ''}
+                
+                <!-- Image Gallery -->
+                <div id="image-gallery-container"></div>
+                
+                <!-- Image Upload (for users if enabled) -->
+                ${!isOwner && data.image_upload_enabled !== false ? `
+                    <div class="image-upload-section" onclick="document.getElementById('file-input').click()">
+                        <p style="margin-bottom: 10px; font-weight: 600; color: #2d3748;">📸 Upload Photos</p>
+                        <p style="font-size: 14px; color: #718096;">Click to select images</p>
+                        <input type="file" id="file-input" accept="image/*" multiple style="display: none;" 
+                               onchange="handleFileSelect(event)">
+                    </div>
+                    <div id="imagePreview" class="image-preview"></div>
+                    <button class="btn btn-upload ${selectedFiles.length === 0 ? 'hidden' : ''}" 
+                            id="upload-btn" onclick="uploadImages()">
+                        ⬆️ Upload ${selectedFiles.length} Image(s)
+                    </button>
+                ` : ''}
+                
+                <!-- Feedback Section -->
+                <div class="feedback-section">
+                    <h3>💬 User Feedback</h3>
+                    
+                    <div class="feedback-form">
+                        <div class="rating-input" id="rating-stars">
+                            ${[1, 2, 3, 4, 5].map(i => 
+                                `<span class="star" data-rating="${i}" onclick="setRating(${i})">★</span>`
+                            ).join('')}
+                        </div>
+                        <textarea id="feedback-text" class="feedback-input" 
+                                  placeholder="Share your experience..."></textarea>
+                        <button class="btn btn-success btn-small" onclick="submitFeedback()">
+                            📝 Submit Feedback
+                        </button>
+                    </div>
+                    
+                    <div id="feedback-list" class="feedback-list"></div>
                 </div>
                 
                 <button class="btn btn-primary" onclick="shareTracking()">
-                    📤 Share Tracking Link
+                    🔗 Share Tracking Link
                 </button>
                 
                 <button class="btn btn-secondary" onclick="showQRScanner()">
-                    📷 Scan Another QR Code
-                </button>
-                
-                <button class="btn btn-secondary" onclick="location.reload()">
-                    🔄 Refresh
+                    🔍 Scan New QR Code
                 </button>
             `;
             
             document.getElementById('app-content').innerHTML = content;
-            loadExistingImages(data.tracking_id);
+        }
+        
+        function loadLocationNotes(id) {
+            const notesRef = database.ref('location_notes/' + id);
+            
+            notesRef.on('value', (snapshot) => {
+                const container = document.getElementById('location-notes-container');
+                if (!container) return;
+                
+                if (snapshot.exists()) {
+                    let notesHTML = '<div class="location-notes"><h4>📍 Location Updates</h4>';
+                    
+                    const notes = [];
+                    snapshot.forEach((child) => {
+                        notes.push({ key: child.key, ...child.val() });
+                    });
+                    
+                    // Sort by timestamp (newest first)
+                    notes.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                    
+                    notes.forEach(note => {
+                        notesHTML += `
+                            <div class="location-note-item">
+                                <div class="location-note-text">${note.text}</div>
+                                <div class="location-note-time">
+                                    ${note.timestamp ? formatDate(new Date(note.timestamp)) : 'Just now'}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    notesHTML += '</div>';
+                    container.innerHTML = notesHTML;
+                } else {
+                    container.innerHTML = '';
+                }
+            });
+        }
+        
+        function sendLocationNote() {
+            const noteInput = document.getElementById('location-note-input');
+            const noteText = noteInput.value.trim();
+            
+            if (!noteText) {
+                showError('Please enter a location note');
+                return;
+            }
+            
+            const noteData = {
+                text: noteText,
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                sender_id: currentUserId
+            };
+            
+            database.ref('location_notes/' + trackingId).push(noteData)
+                .then(() => {
+                    noteInput.value = '';
+                    showSuccess('Location note sent!');
+                })
+                .catch((error) => {
+                    showError('Failed to send note: ' + error.message);
+                });
+        }
+        
+        function toggleImageUpload() {
+            const newState = postData.image_upload_enabled === false;
+            
+            database.ref('tracking/' + trackingId).update({
+                image_upload_enabled: newState
+            }).then(() => {
+                showSuccess(`Image upload ${newState ? 'enabled' : 'disabled'}`);
+            });
+        }
+        
+        function loadImages(id) {
+            const imagesRef = database.ref('tracking_images/' + id);
+            
+            imagesRef.on('value', (snapshot) => {
+                const container = document.getElementById('image-gallery-container');
+                if (!container) return;
+                
+                if (snapshot.exists()) {
+                    let imagesHTML = '<div class="image-gallery"><h3>🖼️ Photos</h3><div class="image-grid">';
+                    
+                    snapshot.forEach((child) => {
+                        const imageData = child.val();
+                        imagesHTML += `
+                            <div class="image-item" onclick="openImageModal('${imageData.url}')">
+                                <img src="${imageData.url}" alt="${imageData.name || 'Image'}">
+                            </div>
+                        `;
+                    });
+                    
+                    imagesHTML += '</div></div>';
+                    container.innerHTML = imagesHTML;
+                } else {
+                    container.innerHTML = '';
+                }
+            });
+        }
+        
+        function openImageModal(url) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            modal.classList.add('active');
+            modalImg.src = url;
+        }
+        
+        function closeImageModal() {
+            document.getElementById('imageModal').classList.remove('active');
         }
         
         function handleFileSelect(event) {
-            const files = Array.from(event.target.files);
-            selectedFiles = files;
-            
-            // Preview selected images
+            selectedFiles = Array.from(event.target.files);
+            displayImagePreviews();
+            document.getElementById('upload-btn').classList.remove('hidden');
+        }
+        
+        function displayImagePreviews() {
             const previewContainer = document.getElementById('imagePreview');
             previewContainer.innerHTML = '';
             
-            files.forEach((file, index) => {
+            selectedFiles.forEach((file, index) => {
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const previewItem = document.createElement('div');
                     previewItem.className = 'preview-item';
                     previewItem.innerHTML = `
-                        <img src="${e.target.result}" alt="Preview ${index + 1}">
-                        <button class="remove-btn" onclick="removeImage(${index})">×</button>
+                        <img src="${e.target.result}" alt="Preview">
+                        <button class="preview-remove" onclick="removePreview(${index})">×</button>
                     `;
                     previewContainer.appendChild(previewItem);
                 };
                 reader.readAsDataURL(file);
             });
-            
-            // Auto upload
-            if (files.length > 0) {
-                uploadImages();
-            }
         }
         
-        function removeImage(index) {
+        function removePreview(index) {
             selectedFiles.splice(index, 1);
-            const event = { target: { files: selectedFiles } };
-            handleFileSelect(event);
+            displayImagePreviews();
+            
+            if (selectedFiles.length === 0) {
+                document.getElementById('upload-btn').classList.add('hidden');
+            } else {
+                document.getElementById('upload-btn').textContent = `⬆️ Upload ${selectedFiles.length} Image(s)`;
+            }
         }
         
         function uploadImages() {
             if (selectedFiles.length === 0) return;
             
-            const progressBar = document.getElementById('progressBar');
-            const progressContainer = document.getElementById('uploadProgress');
-            progressContainer.classList.add('active');
+            const uploadBtn = document.getElementById('upload-btn');
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = 'Uploading...';
             
-            let uploadedCount = 0;
-            const totalFiles = selectedFiles.length;
+            let uploadCount = 0;
             
-            selectedFiles.forEach((file, index) => {
-                const fileName = `tracking_images/${trackingId}/${Date.now()}_${index}.${file.name.split('.').pop()}`;
-                const storageRef = storage.ref(fileName);
+            selectedFiles.forEach((file) => {
+                const storageRef = storage.ref('tracking_images/' + trackingId + '/' + Date.now() + '_' + file.name);
                 const uploadTask = storageRef.put(file);
                 
-                uploadTask.on('state_changed',
-                    (snapshot) => {
-                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                        const totalProgress = ((uploadedCount + (progress / 100)) / totalFiles) * 100;
-                        progressBar.style.width = totalProgress + '%';
-                        progressBar.textContent = Math.round(totalProgress) + '%';
-                    },
-                    (error) => {
-                        console.error('Upload error:', error);
-                        showError('Upload failed: ' + error.message);
-                    },
-                    () => {
-                        uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-                            // Save to database
-                            const imageData = {
-                                url: downloadURL,
-                                uploaded_at: firebase.database.ServerValue.TIMESTAMP,
-                                name: file.name
-                            };
-                            
-                            database.ref('tracking_images/' + trackingId).push(imageData);
-                            
-                            uploadedCount++;
-                            if (uploadedCount === totalFiles) {
-                                setTimeout(() => {
-                                    progressContainer.classList.remove('active');
-                                    selectedFiles = [];
-                                    document.getElementById('imageInput').value = '';
-                                    showSuccess('ပုံများ upload လုပ်ပြီးပါပြီ! / Images uploaded successfully!');
-                                }, 1000);
-                            }
-                        });
+                uploadTask.then((snapshot) => {
+                    return snapshot.ref.getDownloadURL();
+                }).then((downloadURL) => {
+                    const imageData = {
+                        url: downloadURL,
+                        name: file.name,
+                        uploaded_by: currentUserId,
+                        uploaded_at: firebase.database.ServerValue.TIMESTAMP
+                    };
+                    
+                    return database.ref('tracking_images/' + trackingId).push(imageData);
+                }).then(() => {
+                    uploadCount++;
+                    
+                    if (uploadCount === selectedFiles.length) {
+                        selectedFiles = [];
+                        document.getElementById('imagePreview').innerHTML = '';
+                        uploadBtn.classList.add('hidden');
+                        uploadBtn.disabled = false;
+                        uploadBtn.textContent = '⬆️ Upload Images';
+                        showSuccess('Images uploaded successfully!');
                     }
-                );
+                }).catch((error) => {
+                    showError('Upload failed: ' + error.message);
+                    uploadBtn.disabled = false;
+                    uploadBtn.textContent = `⬆️ Upload ${selectedFiles.length} Image(s)`;
+                });
             });
         }
         
-        function loadExistingImages(id) {
-            const imagesRef = database.ref('tracking_images/' + id);
+        function setRating(rating) {
+            currentRating = rating;
+            const stars = document.querySelectorAll('.star');
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
+        
+        function submitFeedback() {
+            const feedbackText = document.getElementById('feedback-text').value.trim();
             
-            imagesRef.on('value', (snapshot) => {
-                const previewContainer = document.getElementById('imagePreview');
-                if (!previewContainer) return;
+            if (currentRating === 0) {
+                showError('Please select a rating');
+                return;
+            }
+            
+            if (!feedbackText) {
+                showError('Please enter your feedback');
+                return;
+            }
+            
+            const feedbackData = {
+                rating: currentRating,
+                text: feedbackText,
+                user_id: currentUserId,
+                created_at: firebase.database.ServerValue.TIMESTAMP
+            };
+            
+            database.ref('feedbacks/' + trackingId).push(feedbackData)
+                .then(() => {
+                    document.getElementById('feedback-text').value = '';
+                    setRating(0);
+                    showSuccess('Feedback submitted! Thank you!');
+                })
+                .catch((error) => {
+                    showError('Failed to submit feedback: ' + error.message);
+                });
+        }
+        
+        function loadFeedbacks(id) {
+            const feedbacksRef = database.ref('feedbacks/' + id);
+            
+            feedbacksRef.on('value', (snapshot) => {
+                const container = document.getElementById('feedback-list');
+                if (!container) return;
                 
-                // Don't clear if we're uploading
-                if (selectedFiles.length > 0) return;
-                
-                previewContainer.innerHTML = '';
+                container.innerHTML = '';
                 
                 if (snapshot.exists()) {
+                    const feedbacks = [];
                     snapshot.forEach((child) => {
-                        const imageData = child.val();
-                        const previewItem = document.createElement('div');
-                        previewItem.className = 'preview-item';
-                        previewItem.innerHTML = `
-                            <img src="${imageData.url}" alt="${imageData.name || 'Uploaded image'}">
-                        `;
-                        previewItem.onclick = () => {
-                            window.open(imageData.url, '_blank');
-                        };
-                        previewContainer.appendChild(previewItem);
+                        feedbacks.push({ key: child.key, ...child.val() });
                     });
+                    
+                    // Sort by timestamp (newest first)
+                    feedbacks.sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
+                    
+                    feedbacks.forEach(feedback => {
+                        const feedbackItem = document.createElement('div');
+                        feedbackItem.className = 'feedback-item';
+                        
+                        const stars = '★'.repeat(feedback.rating) + '☆'.repeat(5 - feedback.rating);
+                        
+                        feedbackItem.innerHTML = `
+                            <div class="feedback-rating">${stars}</div>
+                            <div class="feedback-text">${feedback.text}</div>
+                            <div class="feedback-meta">
+                                ${feedback.created_at ? formatDate(new Date(feedback.created_at)) : 'Just now'}
+                            </div>
+                        `;
+                        
+                        container.appendChild(feedbackItem);
+                    });
+                } else {
+                    container.innerHTML = '<p style="text-align: center; color: #718096; padding: 20px;">No feedback yet</p>';
                 }
             });
         }
@@ -680,7 +1110,6 @@
                 last_scan_at: firebase.database.ServerValue.TIMESTAMP
             };
             
-            // Get user's location (if permitted)
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
@@ -694,6 +1123,18 @@
                 );
             } else {
                 database.ref('tracking/' + id).update(updates);
+            }
+        }
+        
+        function updateStatus() {
+            const newStatus = prompt('Enter new status:', postData.status || 'Active');
+            if (newStatus) {
+                database.ref('tracking/' + trackingId).update({
+                    status: newStatus,
+                    last_scan_at: firebase.database.ServerValue.TIMESTAMP
+                }).then(() => {
+                    showSuccess('Status updated!');
+                });
             }
         }
         
@@ -714,9 +1155,9 @@
                     <div id="qr-reader" style="display:none;"></div>
                     
                     <div class="qr-upload-section">
-                        <h4>သို့မဟုတ် QR ပုံ upload လုပ်ပါ:</h4>
-                        <input type="file" id="qr-image-input" accept="image/*" style="display:none;" onchange="handleQRImageUpload(event)">
-                        <img id="qr-image-preview" alt="QR Preview">
+                        <input type="file" id="qr-image-input" accept="image/*" style="display:none;" 
+                               onchange="handleQRImageUpload(event)">
+                        <img id="qr-image-preview" alt="QR Preview" style="display:none; max-width: 100%; margin-top: 10px;">
                         <div id="qr-scan-result"></div>
                     </div>
                 </div>
@@ -749,7 +1190,6 @@
                     // Ignore continuous scanning errors
                 }
             ).catch(err => {
-                console.log('QR Scanner error:', err);
                 showError('Camera access မရပါ။ QR ပုံ upload လုပ်ပါ။');
             });
         }
@@ -764,7 +1204,6 @@
                 img.src = e.target.result;
                 img.style.display = 'block';
                 
-                // Create image element for jsQR
                 const image = new Image();
                 image.src = e.target.result;
                 
@@ -795,19 +1234,16 @@
         
         function processQRCode(decodedText) {
             try {
-                // Try to parse as URL
                 const url = new URL(decodedText);
                 const id = url.searchParams.get('id');
                 if (id) {
                     trackingId = id;
                     window.location.search = '?id=' + id;
                 } else {
-                    // If no 'id' param, try using the whole text as ID
                     trackingId = decodedText;
                     window.location.search = '?id=' + decodedText;
                 }
             } catch (e) {
-                // Not a URL, treat as direct tracking ID
                 trackingId = decodedText;
                 window.location.search = '?id=' + decodedText;
             }
@@ -829,7 +1265,6 @@
                     text: 'View tracking information',
                     url: url
                 }).catch(err => {
-                    // Fallback to copy
                     copyToClipboard(url);
                 });
             } else {
@@ -840,17 +1275,16 @@
         function copyToClipboard(text) {
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(text).then(() => {
-                    showSuccess('Link copied to clipboard! / Link ကူးပြီးပါပြီ!');
+                    showSuccess('Link copied to clipboard!');
                 });
             } else {
-                // Fallback for older browsers
                 const textarea = document.createElement('textarea');
                 textarea.value = text;
                 document.body.appendChild(textarea);
                 textarea.select();
                 document.execCommand('copy');
                 document.body.removeChild(textarea);
-                showSuccess('Link copied! / Link ကူးပြီးပါပြီ!');
+                showSuccess('Link copied!');
             }
         }
         
@@ -882,10 +1316,17 @@
             });
         }
         
-        // Cleanup on page unload
+        // Cleanup
         window.addEventListener('beforeunload', () => {
             if (html5QrCode) {
                 html5QrCode.stop();
+            }
+        });
+        
+        // Close modal on click outside
+        document.getElementById('imageModal').addEventListener('click', (e) => {
+            if (e.target.id === 'imageModal') {
+                closeImageModal();
             }
         });
     </script>
