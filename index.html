@@ -1291,6 +1291,7 @@
                 const container = document.getElementById('feedback-list');
                 if (!container) return;
                 
+                // Clear container first
                 container.innerHTML = '';
                 
                 if (snapshot.exists()) {
@@ -1305,11 +1306,13 @@
                         const feedbackItem = document.createElement('div');
                         feedbackItem.className = 'feedback-item';
                         
-                        const stars = '★'.repeat(feedback.rating) + '☆'.repeat(5 - feedback.rating);
+                        // Ensure rating is a valid number between 1-5
+                        const rating = Math.min(5, Math.max(1, parseInt(feedback.rating) || 0));
+                        const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
                         
                         feedbackItem.innerHTML = `
                             <div class="feedback-rating">${stars}</div>
-                            <div class="feedback-text">${feedback.text}</div>
+                            <div class="feedback-text">${feedback.text || ''}</div>
                             <div class="feedback-meta">
                                 ${feedback.created_at ? formatDate(new Date(feedback.created_at)) : 'Just now'}
                             </div>
