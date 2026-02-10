@@ -797,44 +797,99 @@
         
         // Load post image and comments from posts database
         function loadPostData(id) {
-            // Load from posts/{tracking_id}
-            database.ref('posts/' + id).once('value', (snapshot) => {
-                const container = document.getElementById('post-image-container');
-                if (!container) return;
-                
-                if (snapshot.exists()) {
-                    const post = snapshot.val();
-                    let html = '<div class="post-image-section"><h3>📸 Post Details</h3>';
+            // First get the post_key from tracking data
+            database.ref('tracking/' + id).once('value', (trackingSnapshot) => {
+                if (trackingSnapshot.exists()) {
+                    const trackingData = trackingSnapshot.val();
+                    const post_key = trackingData.post_key;
                     
-                    if (post.img) {
-                        html += `<img src="${post.img}" class="post-main-image" onclick="openImageModal('${post.img}')" alt="Post Image">`;
+                    if (post_key) {
+                        // Load from posts/{post_key}
+                        database.ref('posts/' + post_key).once('value', (snapshot) => {
+                            const container = document.getElementById('post-image-container');
+                            if (!container) return;
+                            
+                            if (snapshot.exists()) {
+                                const post = snapshot.val();
+                                let html = '<div class="post-image-section"><h3>📸 Post Details</h3>';
+                                
+                                // Check for different possible image field names
+                                const imageUrl = post.img || post.photo_url || post.image_url || post.imageUrl;
+                                
+                                if (imageUrl) {
+                                    html += `<img src="${imageUrl}" class="post-main-image" onclick="openImageModal('${imageUrl}')" alt="Post Image">`;
+                                } else {
+                                    html += '<div class="post-no-image">📷 No image available</div>';
+                                }
+                                
+                                if (post.description || post.data) {
+                                    const desc = post.description || post.data || '';
+                                    html += `
+                                        <div class="post-description">
+                                            <h4>📝 Description:</h4>
+                                            <p>${desc}</p>
+                                        </div>
+                                    `;
+                                }
+                                
+                                html += '</div>';
+                                container.innerHTML = html;
+                            } else {
+                                container.innerHTML = '<div class="post-image-section"><div class="post-no-image">📦 Post data not found</div></div>';
+                            }
+                        });
+                        
+                        // Load comments using post_key
+                        loadComments(post_key);
                     } else {
-                        html += '<div class="post-no-image">📷 No image available</div>';
+                        // Fallback: try using tracking_id as post_key
+                        database.ref('posts/' + id).once('value', (snapshot) => {
+                            const container = document.getElementById('post-image-container');
+                            if (!container) return;
+                            
+                            if (snapshot.exists()) {
+                                const post = snapshot.val();
+                                let html = '<div class="post-image-section"><h3>📸 Post Details</h3>';
+                                
+                                const imageUrl = post.img || post.photo_url || post.image_url || post.imageUrl;
+                                
+                                if (imageUrl) {
+                                    html += `<img src="${imageUrl}" class="post-main-image" onclick="openImageModal('${imageUrl}')" alt="Post Image">`;
+                                } else {
+                                    html += '<div class="post-no-image">📷 No image available</div>';
+                                }
+                                
+                                if (post.description || post.data) {
+                                    const desc = post.description || post.data || '';
+                                    html += `
+                                        <div class="post-description">
+                                            <h4>📝 Description:</h4>
+                                            <p>${desc}</p>
+                                        </div>
+                                    `;
+                                }
+                                
+                                html += '</div>';
+                                container.innerHTML = html;
+                            } else {
+                                container.innerHTML = '<div class="post-image-section"><div class="post-no-image">📦 Post data not found</div></div>';
+                            }
+                        });
+                        
+                        loadComments(id);
                     }
-                    
-                    if (post.description) {
-                        html += `
-                            <div class="post-description">
-                                <h4>📝 Description:</h4>
-                                <p>${post.description}</p>
-                            </div>
-                        `;
-                    }
-                    
-                    html += '</div>';
-                    container.innerHTML = html;
                 } else {
-                    container.innerHTML = '<div class="post-image-section"><div class="post-no-image">📦 Post data not found</div></div>';
+                    const container = document.getElementById('post-image-container');
+                    if (container) {
+                        container.innerHTML = '<div class="post-image-section"><div class="post-no-image">⚠️ Tracking data not found</div></div>';
+                    }
                 }
             });
-            
-            // Load comments
-            loadComments(id);
         }
         
-        // Load comments from comments/{post_id}
-        function loadComments(id) {
-            database.ref('comments/' + id).on('value', (snapshot) => {
+        // Load comments from comments/{post_key}
+        function loadComments(post_id) {
+            database.ref('comments/' + post_id).on('value', (snapshot) => {
                 const container = document.getElementById('comments-container');
                 if (!container) return;
                 
@@ -850,8 +905,9 @@
                     comments.sort((a, b) => (b.time || 0) - (a.time || 0));
                     
                     comments.forEach(comment => {
-                        const username = comment.name || 'Anonymous';
+                        const username = comment.name || comment.username || 'Anonymous';
                         const initial = username.charAt(0).toUpperCase();
+                        const commentText = comment.comment || comment.text || comment.message || '';
                         
                         html += `
                             <div class="comment-item">
@@ -864,7 +920,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="comment-text">${comment.comment || comment.text || ''}</div>
+                                <div class="comment-text">${commentText}</div>
                             </div>
                         `;
                     });
