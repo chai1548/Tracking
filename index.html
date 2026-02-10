@@ -67,7 +67,7 @@
             font-size: 14px;
         }
         
-        /* POST IMAGE SECTION - NEW */
+        /* POST IMAGE SECTION */
         .post-image-section {
             background: #f7fafc;
             border-radius: 16px;
@@ -91,6 +91,7 @@
             border-radius: 12px;
             cursor: pointer;
             transition: transform 0.2s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         
         .post-main-image:hover {
@@ -112,7 +113,92 @@
             margin-bottom: 8px;
         }
         
-        /* ADMIN FEEDBACK SECTION - NEW */
+        .post-no-image {
+            text-align: center;
+            padding: 40px;
+            background: #f3f4f6;
+            border-radius: 12px;
+            color: #9ca3af;
+        }
+        
+        /* COMMENTS SECTION */
+        .comments-section {
+            background: #f0f9ff;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid #3b82f6;
+        }
+        
+        .comments-section h3 {
+            color: #1e40af;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 18px;
+        }
+        
+        .comment-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .comment-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .comment-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .comment-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .comment-user-info {
+            flex: 1;
+        }
+        
+        .comment-username {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 14px;
+        }
+        
+        .comment-time {
+            color: #9ca3af;
+            font-size: 11px;
+        }
+        
+        .comment-text {
+            color: #374151;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+        
+        .no-comments {
+            text-align: center;
+            padding: 30px;
+            color: #9ca3af;
+        }
+        
+        /* ADMIN FEEDBACK SECTION */
         .admin-feedback-section {
             background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
             border-radius: 16px;
@@ -685,7 +771,7 @@
             const trackingRef = database.ref('tracking/' + id);
             
             trackingRef.once('value', (snapshot) => {
-                if (snapshot.exists()) {
+             if (snapshot.exists()) {
                     postData = snapshot.val();
                     isOwner = (currentUserId === postData.owner_uid);
                     displayTrackingInfo(postData);
@@ -693,8 +779,8 @@
                     loadLocationNotes(id);
                     loadImages(id);
                     loadFeedbacks(id);
-                    loadAdminFeedback(id); // NEW: Load admin feedback
-                    loadPostImage(id); // NEW: Load post image
+                    loadAdminFeedback(id);
+                    loadPostData(id); // Load post image and comments
                     
                     trackingRef.on('value', (snap) => {
                         if (snap.exists()) {
@@ -709,8 +795,9 @@
             });
         }
         
-        // NEW: Load post image and description
-        function loadPostImage(id) {
+        // Load post image and comments from posts database
+        function loadPostData(id) {
+            // Load from posts/{tracking_id}
             database.ref('posts/' + id).once('value', (snapshot) => {
                 const container = document.getElementById('post-image-container');
                 if (!container) return;
@@ -721,6 +808,8 @@
                     
                     if (post.img) {
                         html += `<img src="${post.img}" class="post-main-image" onclick="openImageModal('${post.img}')" alt="Post Image">`;
+                    } else {
+                        html += '<div class="post-no-image">📷 No image available</div>';
                     }
                     
                     if (post.description) {
@@ -733,14 +822,67 @@
                     }
                     
                     html += '</div>';
-                  container.innerHTML = html;
+                    container.innerHTML = html;
                 } else {
-                    container.innerHTML = '';
+                    container.innerHTML = '<div class="post-image-section"><div class="post-no-image">📦 Post data not found</div></div>';
+                }
+            });
+            
+            // Load comments
+            loadComments(id);
+        }
+        
+        // Load comments from comments/{post_id}
+        function loadComments(id) {
+            database.ref('comments/' + id).on('value', (snapshot) => {
+                const container = document.getElementById('comments-container');
+                if (!container) return;
+                
+                if (snapshot.exists()) {
+                    let html = '<div class="comments-section"><h3>💬 Comments</h3>';
+                    
+                    const comments = [];
+                    snapshot.forEach((child) => {
+                        comments.push({ key: child.key, ...child.val() });
+                    });
+                    
+                    // Sort by timestamp (newest first)
+                    comments.sort((a, b) => (b.time || 0) - (a.time || 0));
+                    
+                    comments.forEach(comment => {
+                        const username = comment.name || 'Anonymous';
+                        const initial = username.charAt(0).toUpperCase();
+                        
+                        html += `
+                            <div class="comment-item">
+                                <div class="comment-header">
+                                    <div class="comment-avatar">${initial}</div>
+                                    <div class="comment-user-info">
+                                        <div class="comment-username">${username}</div>
+                                        <div class="comment-time">
+                                            ${comment.time ? formatDate(new Date(comment.time)) : 'Just now'}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="comment-text">${comment.comment || comment.text || ''}</div>
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div>';
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = `
+                        <div class="comments-section">
+                            <h3>💬 Comments</h3>
+                            <div class="no-comments">No comments yet</div>
+                        </div>
+                    `;
                 }
             });
         }
         
-        // NEW: Load admin feedback with images
+        // Load admin feedback
         function loadAdminFeedback(id) {
             database.ref('admin_feedback/' + id).on('value', (snapshot) => {
                 const container = document.getElementById('admin-feedback-container');
@@ -768,11 +910,10 @@
                                 <div class="admin-feedback-text">${feedback.message || feedback.text || ''}</div>
                         `;
                         
-                        // Display admin feedback images
                         if (feedback.images && feedback.images.length > 0) {
                             html += '<div class="admin-feedback-images">';
                             feedback.images.forEach(imgUrl => {
-                                html += `<img src="${imgUrl}" class="admin-feedback-img" onclick="openImageModal('${imgUrl}')" alt="Admin feedback image">`;
+                                html += `<img src="${imgUrl}" class="admin-feedback-img" onclick="openImageModal('${imgUrl}')" alt="Admin feedback">`;
                             });
                             html += '</div>';
                         }
@@ -790,10 +931,13 @@
         
         function displayTrackingInfo(data) {
             const content = `
-                <!-- POST IMAGE SECTION - NEW -->
+                <!-- POST IMAGE & DESCRIPTION -->
                 <div id="post-image-container"></div>
                 
-                <!-- ADMIN FEEDBACK SECTION - NEW -->
+                <!-- COMMENTS SECTION -->
+                <div id="comments-container"></div>
+                
+                <!-- ADMIN FEEDBACK -->
                 <div id="admin-feedback-container"></div>
                 
                 <div class="status-card">
