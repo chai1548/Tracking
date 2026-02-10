@@ -771,7 +771,7 @@
             const trackingRef = database.ref('tracking/' + id);
             
             trackingRef.once('value', (snapshot) => {
-             if (snapshot.exists()) {
+                  if (snapshot.exists()) {
                     postData = snapshot.val();
                     isOwner = (currentUserId === postData.owner_uid);
                     displayTrackingInfo(postData);
@@ -797,94 +797,100 @@
         
         // Load post image and comments from posts database
         function loadPostData(id) {
-            // First get the post_key from tracking data
+            console.log('🔍 Loading post data for tracking ID:', id);
+            
+            // Strategy 1: Get post_key from tracking data
             database.ref('tracking/' + id).once('value', (trackingSnapshot) => {
                 if (trackingSnapshot.exists()) {
                     const trackingData = trackingSnapshot.val();
+                    console.log('✅ Tracking data found:', trackingData);
+                    
                     const post_key = trackingData.post_key;
+                    console.log('📌 Post key from tracking:', post_key);
                     
                     if (post_key) {
-                        // Load from posts/{post_key}
-                        database.ref('posts/' + post_key).once('value', (snapshot) => {
-                            const container = document.getElementById('post-image-container');
-                            if (!container) return;
-                            
-                            if (snapshot.exists()) {
-                                const post = snapshot.val();
-                                let html = '<div class="post-image-section"><h3>📸 Post Details</h3>';
-                                
-                                // Check for different possible image field names
-                                const imageUrl = post.img || post.photo_url || post.image_url || post.imageUrl;
-                                
-                                if (imageUrl) {
-                                    html += `<img src="${imageUrl}" class="post-main-image" onclick="openImageModal('${imageUrl}')" alt="Post Image">`;
-                                } else {
-                                    html += '<div class="post-no-image">📷 No image available</div>';
-                                }
-                                
-                                if (post.description || post.data) {
-                                    const desc = post.description || post.data || '';
-                                    html += `
-                                        <div class="post-description">
-                                            <h4>📝 Description:</h4>
-                                            <p>${desc}</p>
-                                        </div>
-                                    `;
-                                }
-                                
-                                html += '</div>';
-                                container.innerHTML = html;
-                            } else {
-                                container.innerHTML = '<div class="post-image-section"><div class="post-no-image">📦 Post data not found</div></div>';
-                            }
-                        });
-                        
-                        // Load comments using post_key
+                        // Try loading from posts/{post_key}
+                        tryLoadPost(post_key, 'posts/' + post_key + ' (from tracking.post_key)');
+                    } else {
+                        // Strategy 2: Check if tracking_id itself is the post_key
+                        console.log('⚠️ No post_key in tracking data, trying tracking_id as post_key');
+                        tryLoadPost(id, 'posts/' + id + ' (tracking_id as fallback)');
+                    }
+                    
+                    // Also try to load comments with both keys
+                    if (post_key) {
                         loadComments(post_key);
                     } else {
-                        // Fallback: try using tracking_id as post_key
-                        database.ref('posts/' + id).once('value', (snapshot) => {
-                            const container = document.getElementById('post-image-container');
-                            if (!container) return;
-                            
-                            if (snapshot.exists()) {
-                                const post = snapshot.val();
-                                let html = '<div class="post-image-section"><h3>📸 Post Details</h3>';
-                                
-                                const imageUrl = post.img || post.photo_url || post.image_url || post.imageUrl;
-                                
-                                if (imageUrl) {
-                                    html += `<img src="${imageUrl}" class="post-main-image" onclick="openImageModal('${imageUrl}')" alt="Post Image">`;
-                                } else {
-                                    html += '<div class="post-no-image">📷 No image available</div>';
-                                }
-                                
-                                if (post.description || post.data) {
-                                    const desc = post.description || post.data || '';
-                                    html += `
-                                        <div class="post-description">
-                                            <h4>📝 Description:</h4>
-                                            <p>${desc}</p>
-                                        </div>
-                                    `;
-                                }
-                                
-                                html += '</div>';
-                                container.innerHTML = html;
-                            } else {
-                                container.innerHTML = '<div class="post-image-section"><div class="post-no-image">📦 Post data not found</div></div>';
-                            }
-                        });
-                        
                         loadComments(id);
                     }
                 } else {
-                    const container = document.getElementById('post-image-container');
-                    if (container) {
-                        container.innerHTML = '<div class="post-image-section"><div class="post-no-image">⚠️ Tracking data not found</div></div>';
-                    }
+                    console.error('❌ Tracking data not found for ID:', id);
+                    showPostError('⚠️ Tracking data not found');
                 }
             });
+        }
+        
+        function tryLoadPost(key, debugPath) {
+            console.log('🔄 Trying to load post from:', debugPath);
+            
+            database.ref('posts/' + key).once('value', (snapshot) => {
+                const container = document.getElementById('post-image-container');
+                if (!container) return;
+                
+                if (snapshot.exists()) {
+                    const post = snapshot.val();
+                    console.log('✅ Post found:', post);
+                    console.log('📸 Available fields:', Object.keys(post));
+                    
+                    let html = '<div class="post-image-section"><h3>📸 Post Details</h3>';
+                    
+                    // Try multiple possible image field names
+                    const imageUrl = post.img || post.photo_url || post.image_url || 
+                                   post.imageUrl || post.photoUrl || post.picture || 
+                                   post.image || post.photo;
+                    
+                    console.log('🖼️ Image URL found:', imageUrl);
+                    
+                    if (imageUrl) {
+                        html += `<img src="${imageUrl}" class="post-main-image" onclick="openImageModal('${imageUrl}')" alt="Post Image">`;
+                    } else {
+                        console.warn('⚠️ No image field found. Available fields:', Object.keys(post));
+                        html += `<div class="post-no-image">📷 No image available<br><small style="color: #999;">Checked fields: img, photo_url, image_url, etc.</small></div>`;
+                    }
+                    
+                    // Try multiple description fields
+                    const desc = post.description || post.data || post.message || 
+                                post.text || post.content || post.caption || '';
+                    
+                    if (desc) {
+                        html += `
+                            <div class="post-description">
+                                <h4>📝 Description:</h4>
+                                <p>${desc}</p>
+                            </div>
+                        `;
+                    }
+                    
+                    html += '</div>';
+                    container.innerHTML = html;
+                } else {
+                    console.warn('❌ Post not found at:', debugPath);
+                    // Don't show error yet, another strategy might work
+                    if (!container.innerHTML.includes('Post Details')) {
+                        showPostError('📦 Post data not found at: ' + debugPath);
+                    }
+                }
+            }).catch(error => {
+                console.error('❌ Error loading post:', error);
+                showPostError('Error: ' + error.message);
+            });
+        }
+        
+        function showPostError(message) {
+            const container = document.getElementById('post-image-container');
+            if (container) {
+                container.innerHTML = `<div class="post-image-section"><div class="post-no-image">${message}</div></div>`;
+            }
         }
         
         // Load comments from comments/{post_key}
