@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post Tracking System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            padding: 40px;
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #2d3748;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #718096;
+            font-size: 14px;
+        }
+        
+        .tracking-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+        
+        .status-card {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #48bb78;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+        }
+        
+        .status-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .status-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 20px;
+        }
+        
+        .status-icon.active {
+            background: #c6f6d5;
+        }
+        
+        .status-icon.location {
+            background: #feebc8;
+        }
+        
+        .status-icon.time {
+            background: #bee3f8;
+        }
+        
+        .status-icon.views {
+            background: #e9d8fd;
+        }
+        
+        .status-content {
+            flex: 1;
+        }
+        
+        .status-label {
+            font-size: 12px;
+            color: #718096;
+            margin-bottom: 4px;
+        }
+        
+        .status-value {
+            font-size: 16px;
+            color: #2d3748;
+            font-weight: 600;
+        }
+        
+        .qr-section {
+            text-align: center;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .qr-section h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        #qr-reader {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+        
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .success {
+            background: #c6f6d5;
+            color: #22543d;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .tracking-id {
+            background: #edf2f7;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            color: #2d3748;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="tracking-icon">📦</div>
+            <h1>Post Tracking</h1>
+            <p>Real-time tracking system</p>
+        </div>
+        
+        <div id="app-content">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading tracking information...</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <!-- QR Code Scanner (optional) -->
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            databaseURL: "YOUR_DATABASE_URL",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        
+        // Get tracking ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const trackingId = urlParams.get('id');
+        
+        if (trackingId) {
+            loadTrackingData(trackingId);
+        } else {
+            showQRScanner();
+        }
+        
+        function loadTrackingData(id) {
+            const trackingRef = database.ref('tracking/' + id);
+            
+            trackingRef.on('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    displayTrackingInfo(data);
+                    updateTracking(id);
+                } else {
+                    showError('Tracking ID not found');
+                }
+            }, (error) => {
+                showError('Failed to load tracking data: ' + error.message);
+            });
+        }
+        
+        function displayTrackingInfo(data) {
+            const now = new Date();
+            const createdAt = new Date(data.created_at);
+            const lastScan = data.last_scan_at ? new Date(data.last_scan_at) : null;
+            
+            const content = `
+                <div class="tracking-id">
+                    Tracking ID: ${data.tracking_id}
+                </div>
+                
+                <div class="status-card">
+                    <div class="status-item">
+                        <div class="status-icon active">✓</div>
+                        <div class="status-content">
+                            <div class="status-label">Status</div>
+                            <div class="status-value">${data.status || 'Active'}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="status-item">
+                        <div class="status-icon location">📍</div>
+                        <div class="status-content">
+                            <div class="status-label">Location</div>
+                            <div class="status-value">${data.last_location || 'Not scanned yet'}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="status-item">
+                        <div class="status-icon views">👁️</div>
+                        <div class="status-content">
+                            <div class="status-label">Total Views</div>
+                            <div class="status-value">${data.views || 0}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="status-item">
+                        <div class="status-icon time">🕐</div>
+                        <div class="status-content">
+                            <div class="status-label">Last Scan</div>
+                            <div class="status-value">${lastScan ? formatDate(lastScan) : 'No scans yet'}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="success">
+                    ✓ Tracking information updated in real-time
+                </div>
+                
+                <button class="btn btn-primary" onclick="shareTracking()">
+                    Share Tracking Link
+                </button>
+                
+                <button class="btn btn-secondary" onclick="location.reload()">
+                    Refresh
+                </button>
+            `;
+            
+            document.getElementById('app-content').innerHTML = content;
+        }
+        
+        function updateTracking(id) {
+            const updates = {
+                views: firebase.database.ServerValue.increment(1),
+                last_scan_at: firebase.database.ServerValue.TIMESTAMP
+            };
+            
+            // Get user's location (if permitted)
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        updates.last_location = `${position.coords.latitude.toFixed(4)}, ${position.coords.longitude.toFixed(4)}`;
+                        database.ref('tracking/' + id).update(updates);
+                    },
+                    () => {
+                        updates.last_location = 'Location unavailable';
+                        database.ref('tracking/' + id).update(updates);
+                    }
+                );
+            } else {
+                database.ref('tracking/' + id).update(updates);
+            }
+        }
+        
+        function showQRScanner() {
+            const content = `
+                <div class="qr-section">
+                    <h3>Scan QR Code</h3>
+                    <div id="qr-reader"></div>
+                </div>
+                
+                <button class="btn btn-secondary" onclick="enterManually()">
+                    Enter Tracking ID Manually
+                </button>
+            `;
+            
+            document.getElementById('app-content').innerHTML = content;
+            
+            const html5QrCode = new Html5Qrcode("qr-reader");
+            html5QrCode.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: 250 },
+                (decodedText) => {
+                    html5QrCode.stop();
+                    const url = new URL(decodedText);
+                    const id = url.searchParams.get('id');
+                    if (id) {
+                        window.location.search = '?id=' + id;
+                    }
+                }
+            ).catch(err => {
+                console.log('QR Scanner error:', err);
+                enterManually();
+            });
+        }
+        
+        function enterManually() {
+            const id = prompt('Enter Tracking ID:');
+            if (id) {
+                window.location.search = '?id=' + id;
+            }
+        }
+        
+        function shareTracking() {
+            const url = window.location.href;
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Track Your Order',
+                    text: 'View tracking information',
+                    url: url
+                });
+            } else {
+                navigator.clipboard.writeText(url);
+                alert('Link copied to clipboard!');
+            }
+        }
+        
+        function showError(message) {
+            document.getElementById('app-content').innerHTML = `
+                <div class="error">${message}</div>
+                <button class="btn btn-primary" onclick="location.href='${window.location.pathname}'">
+                    Try Again
+                </button>
+            `;
+        }
+        
+        function formatDate(date) {
+            return date.toLocaleString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+    </script>
+</body>
+</html>
