@@ -151,6 +151,7 @@
         #qr-reader {
             border-radius: 8px;
             overflow: hidden;
+            margin: 0 auto;
         }
         
         .btn {
@@ -163,6 +164,10 @@
             cursor: pointer;
             transition: all 0.3s ease;
             margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         
         .btn-primary {
@@ -194,6 +199,15 @@
         .btn-upload:hover {
             background: #38a169;
             transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background: #f56565;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #e53e3e;
         }
         
         .loading {
@@ -232,6 +246,12 @@
             border-radius: 8px;
             margin-bottom: 20px;
             text-align: center;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         
         .tracking-id {
@@ -263,6 +283,12 @@
             overflow: hidden;
             aspect-ratio: 1;
             background: #f7fafc;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .preview-item:hover {
+            transform: scale(1.05);
         }
         
         .preview-item img {
@@ -286,6 +312,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .preview-item .remove-btn:hover {
+            background: #e53e3e;
+            transform: scale(1.1);
         }
         
         .file-input-wrapper {
@@ -342,508 +374,33 @@
             font-size: 12px;
             font-weight: 600;
         }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <div class="tracking-icon">📦</div>
-            <h1>Post Tracking</h1>
-            <p>Real-time tracking system</p>
-        </div>
         
-        <div id="app-content">
-            <div class="loading">
-                <div class="spinner"></div>
-                <p>Loading tracking information...</p>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
-    
-    <!-- QR Code Scanner (optional) -->
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-    
-    <script>
-        // Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            databaseURL: "YOUR_DATABASE_URL",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
-        
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-        const storage = firebase.storage();
-        
-        // Get tracking ID from URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const trackingId = urlParams.get('id');
-        
-        // Selected files for upload
-        let selectedFiles = [];
-        
-        if (trackingId) {
-            loadTrackingData(trackingId);
-        } else {
-            showQRScanner();
+        .scan-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
         }
         
-        function loadTrackingData(id) {
-            const trackingRef = database.ref('tracking/' + id);
-            
-            trackingRef.on('value', (snapshot) => {
-                if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    displayTrackingInfo(data);
-                    updateTracking(id);
-                } else {
-                    showError('Tracking ID not found');
-                }
-            }, (error) => {
-                showError('Failed to load tracking data: ' + error.message);
-            });
-        }
-        
-        function displayTrackingInfo(data) {
-            const now = new Date();
-            const createdAt = new Date(data.created_at);
-            const lastScan = data.last_scan_at ? new Date(data.last_scan_at) : null;
-            
-            const content = `
-                <div class="tracking-id">
-                    Tracking ID: ${data.tracking_id}
-                </div>
-                
-                <div class="status-card">
-                    <div class="status-item">
-                        <div class="status-icon active">✓</div>
-                        <div class="status-content">
-                            <div class="status-label">Status</div>
-                            <div class="status-value">${data.status || 'Active'}</div>
-                        </div>
-                    </div>
-                    
-                    <div class="status-item">
-                        <div class="status-icon location">📍</div>
-                        <div class="status-content">
-                            <div class="status-label">Location</div>
-                            <div class="status-value">${data.last_location || 'Not scanned yet'}</div>
-                        </div>
-                    </div>
-                    
-                    <div class="status-item">
-                        <div class="status-icon views">👁️</div>
-                        <div class="status-content">
-                            <div class="status-label">Total Views</div>
-                            <div class="status-value">${data.views || 0}</div>
-                        </div>
-                    </div>
-                    
-                    <div class="status-item">
-                        <div class="status-icon time">🕐</div>
-                        <div class="status-content">
-                            <div class="status-label">Last Scan</div>
-                            <div class="status-value">${lastScan ? formatDate(lastScan) : 'No scans yet'}</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Image Upload Section -->
-                <div class="image-picker">
-                    <div class="file-input-wrapper">
-                        <input type="file" id="imageInput" accept="image/*" multiple onchange="handleFileSelect(event)">
-                        <label for="imageInput" class="file-input-label">
-                            📷 Upload Images
-                        </label>
-                    </div>
-                    
-                    <div class="upload-progress" id="uploadProgress">
-                        <div class="progress-bar" id="progressBar" style="width: 0%;">0%</div>
-                    </div>
-                    
-                    <div class="image-preview" id="imagePreview"></div>
-                </div>
-                
-                <div class="success">
-                    ✓ Tracking information updated in real-time
-                </div>
-                
-                <button class="btn btn-primary" onclick="shareTracking()">
-                    Share Tracking Link
-                </button>
-                
-                <button class="btn btn-secondary" onclick="location.reload()">
-                    Refresh
-                </button>
-            `;
-            
-            document.getElementById('app-content').innerHTML = content;
-            loadExistingImages(data.tracking_id);
-        }
-        
-        function handleFileSelect(event) {
-            const files = Array.from(event.target.files);
-            selectedFiles = files;
-            
-            // Preview selected images
-            const previewContainer = document.getElementById('imagePreview');
-            previewContainer.innerHTML = '';
-            
-            files.forEach((file, index) => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const previewItem = document.createElement('div');
-                    previewItem.className = 'preview-item';
-                    previewItem.innerHTML = `
-                        <img src="${e.target.result}" alt="Preview ${index + 1}">
-                        <button class="remove-btn" onclick="removeImage(${index})">×</button>
-                    `;
-                    previewContainer.appendChild(previewItem);
-                };
-                reader.readAsDataURL(file);
-            });
-            
-            // Auto upload
-            if (files.length > 0) {
-                uploadImages();
-            }
-        }
-        
-        function removeImage(index) {
-            selectedFiles.splice(index, 1);
-            const event = { target: { files: selectedFiles } };
-            handleFileSelect(event);
-        }
-        
-        function uploadImages() {
-            if (selectedFiles.length === 0) return;
-            
-            const progressBar = document.getElementById('progressBar');
-            const progressContainer = document.getElementById('uploadProgress');
-            progressContainer.classList.add('active');
-            
-            let uploadedCount = 0;
-            const totalFiles = selectedFiles.length;
-            
-            selectedFiles.forEach((file, index) => {
-                const fileName = `tracking_images/${trackingId}/${Date.now()}_${index}.${file.name.split('.').pop()}`;
-                const storageRef = storage.ref(fileName);
-                const uploadTask = storageRef.put(file);
-                
-                uploadTask.on('state_changed',
-                    (snapshot) => {
-                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                        const totalProgress = ((uploadedCount + (progress / 100)) / totalFiles) * 100;
-                        progressBar.style.width = totalProgress + '%';
-                        progressBar.textContent = Math.round(totalProgress) + '%';
-                    },
-                    (error) => {
-                        console.error('Upload error:', error);
-                        showError('Upload failed: ' + error.message);
-                    },
-                    () => {
-                        uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-                            // Save to database
-                            const imageData = {
-                                url: downloadURL,
-                                uploaded_at: firebase.database.ServerValue.TIMESTAMP,
-                                name: file.name
-                            };
-                            
-                            database.ref('tracking_images/' + trackingId).push(imageData);
-                            
-                            uploadedCount++;
-                            if (uploadedCount === totalFiles) {
-                                setTimeout(() => {
-                                    progressContainer.classList.remove('active');
-                                    selectedFiles = [];
-                                    document.getElementById('imageInput').value = '';
-                                    showSuccess('Images uploaded successfully!');
-                                }, 1000);
-                            }
-                        });
-                    }
-                );
-            });
-        }
-        
-        function loadExistingImages(id) {
-            const imagesRef = database.ref('tracking_images/' + id);
-            
-            imagesRef.on('value', (snapshot) => {
-                const previewContainer = document.getElementById('imagePreview');
-                if (!previewContainer) return;
-                
-                // Don't clear if we're uploading
-                if (selectedFiles.length > 0) return;
-                
-                previewContainer.innerHTML = '';
-                
-                if (snapshot.exists()) {
-                    snapshot.forEach((child) => {
-                        const imageData = child.val();
-                        const previewItem = document.createElement('div');
-                        previewItem.className = 'preview-item';
-                        previewItem.innerHTML = `
-                            <img src="${imageData.url}" alt="${imageData.name || 'Uploaded image'}">
-                        `;
-                        previewItem.onclick = () => {
-                            window.open(imageData.url, '_blank');
-                        };
-                        previewContainer.appendChild(previewItem);
-                    });
-                }
-            });
-        }
-        
-        function updateTracking(id) {
-            const updates = {
-                views: firebase.database.ServerValue.increment(1),
-                last_scan_at: firebase.database.ServerValue.TIMESTAMP
-                  background: #feebc8;
-        }
-        
-        .status-icon.time {
-            background: #bee3f8;
-        }
-        
-        .status-icon.views {
-            background: #e9d8fd;
-        }
-        
-        .status-content {
-            flex: 1;
-        }
-        
-        .status-label {
-            font-size: 12px;
-            color: #718096;
-            margin-bottom: 4px;
-        }
-        
-        .status-value {
-            font-size: 16px;
-            color: #2d3748;
-            font-weight: 600;
-        }
-        
-        .qr-section {
-            text-align: center;
+        .qr-upload-section {
+            background: #f7fafc;
             padding: 20px;
-            background: #f7fafc;
             border-radius: 12px;
-            margin-bottom: 20px;
-        }
-        
-        .qr-section h3 {
-            color: #2d3748;
-            margin-bottom: 15px;
-            font-size: 18px;
-        }
-        
-        #qr-reader {
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        
-        .btn {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 10px;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
-        }
-        
-        .btn-secondary {
-            background: white;
-            color: #667eea;
-            border: 2px solid #667eea;
-        }
-        
-        .btn-secondary:hover {
-            background: #667eea;
-            color: white;
-        }
-        
-        .btn-upload {
-            background: #48bb78;
-            color: white;
-        }
-        
-        .btn-upload:hover {
-            background: #38a169;
-            transform: translateY(-2px);
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 40px;
-        }
-        
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .error {
-            background: #fed7d7;
-            color: #c53030;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        
-        .success {
-            background: #c6f6d5;
-            color: #22543d;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        
-        .tracking-id {
-            background: #edf2f7;
-            padding: 10px 15px;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 14px;
-            color: #2d3748;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        /* Image picker styles */
-        .image-picker {
-            margin: 20px 0;
-        }
-        
-        .image-preview {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 10px;
             margin-top: 15px;
         }
         
-        .preview-item {
-            position: relative;
-            border-radius: 8px;
-            overflow: hidden;
-            aspect-ratio: 1;
-            background: #f7fafc;
-        }
-        
-        .preview-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .preview-item .remove-btn {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background: rgba(239, 68, 68, 0.9);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            cursor: pointer;
+        .qr-upload-section h4 {
+            color: #2d3748;
+            margin-bottom: 10px;
             font-size: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
         
-        .file-input-wrapper {
-            position: relative;
-            overflow: hidden;
-            display: inline-block;
-            width: 100%;
-        }
-        
-        .file-input-wrapper input[type=file] {
-            position: absolute;
-            left: -9999px;
-        }
-        
-        .file-input-label {
-            display: block;
-            width: 100%;
-            padding: 15px;
-            background: #48bb78;
-            color: white;
-            border-radius: 8px;
-            text-align: center;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-        
-        .file-input-label:hover {
-            background: #38a169;
-            transform: translateY(-2px);
-        }
-        
-        .upload-progress {
-            margin-top: 10px;
-            background: #edf2f7;
-            border-radius: 8px;
-            overflow: hidden;
+        #qr-image-preview {
+            max-width: 100%;
+            max-height: 300px;
+            margin: 10px auto;
             display: none;
-        }
-        
-        .upload-progress.active {
-            display: block;
-        }
-        
-        .progress-bar {
-            height: 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            transition: width 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 12px;
-            font-weight: 600;
+            border-radius: 8px;
         }
     </style>
 </head>
@@ -868,19 +425,22 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
     
-    <!-- QR Code Scanner (optional) -->
+    <!-- QR Code Scanner -->
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     
+    <!-- QR Code Reader (for image upload) -->
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    
     <script>
-        // Firebase Configuration
+        // Firebase Configuration - YOUR ACTUAL CONFIG
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            databaseURL: "YOUR_DATABASE_URL",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
+            apiKey: "AIzaSyB49vRPX8YaWuTP5GS3lsBDqdAaz_hJYAw",
+            authDomain: "onlineshop-849c8.firebaseapp.com",
+            databaseURL: "https://onlineshop-849c8.firebaseio.com",
+            projectId: "onlineshop-849c8",
+            storageBucket: "onlineshop-849c8.appspot.com",
+            messagingSenderId: "883512833370",
+            appId: "1:883512833370:android:185171fa84296e0dafef63"
         };
         
         // Initialize Firebase
@@ -890,10 +450,11 @@
         
         // Get tracking ID from URL
         const urlParams = new URLSearchParams(window.location.search);
-        const trackingId = urlParams.get('id');
+        let trackingId = urlParams.get('id');
         
         // Selected files for upload
         let selectedFiles = [];
+        let html5QrCode = null;
         
         if (trackingId) {
             loadTrackingData(trackingId);
@@ -910,7 +471,7 @@
                     displayTrackingInfo(data);
                     updateTracking(id);
                 } else {
-                    showError('Tracking ID not found');
+                    showError('Tracking ID မတွေ့ပါ / Tracking ID not found');
                 }
             }, (error) => {
                 showError('Failed to load tracking data: ' + error.message);
@@ -966,7 +527,7 @@
                     <div class="file-input-wrapper">
                         <input type="file" id="imageInput" accept="image/*" multiple onchange="handleFileSelect(event)">
                         <label for="imageInput" class="file-input-label">
-                            📷 Upload Images
+                            📷 Upload ပုံများ / Upload Images
                         </label>
                     </div>
                     
@@ -982,11 +543,15 @@
                 </div>
                 
                 <button class="btn btn-primary" onclick="shareTracking()">
-                    Share Tracking Link
+                    📤 Share Tracking Link
+                </button>
+                
+                <button class="btn btn-secondary" onclick="showQRScanner()">
+                    📷 Scan Another QR Code
                 </button>
                 
                 <button class="btn btn-secondary" onclick="location.reload()">
-                    Refresh
+                    🔄 Refresh
                 </button>
             `;
             
@@ -1071,7 +636,7 @@
                                     progressContainer.classList.remove('active');
                                     selectedFiles = [];
                                     document.getElementById('imageInput').value = '';
-                                    showSuccess('Images uploaded successfully!');
+                                    showSuccess('ပုံများ upload လုပ်ပြီးပါပြီ! / Images uploaded successfully!');
                                 }, 1000);
                             }
                         });
@@ -1135,38 +700,123 @@
         function showQRScanner() {
             const content = `
                 <div class="qr-section">
-                    <h3>Scan QR Code</h3>
-                    <div id="qr-reader"></div>
+                    <h3>🔍 QR Code Scan လုပ်ပါ</h3>
+                    
+                    <div class="scan-options">
+                        <button class="btn btn-primary" onclick="startCameraScanner()">
+                            📹 Camera Scan
+                        </button>
+                        <button class="btn btn-upload" onclick="document.getElementById('qr-image-input').click()">
+                            🖼️ Upload QR Image
+                        </button>
+                    </div>
+                    
+                    <div id="qr-reader" style="display:none;"></div>
+                    
+                    <div class="qr-upload-section">
+                        <h4>သို့မဟုတ် QR ပုံ upload လုပ်ပါ:</h4>
+                        <input type="file" id="qr-image-input" accept="image/*" style="display:none;" onchange="handleQRImageUpload(event)">
+                        <img id="qr-image-preview" alt="QR Preview">
+                        <div id="qr-scan-result"></div>
+                    </div>
                 </div>
                 
                 <button class="btn btn-secondary" onclick="enterManually()">
-                    Enter Tracking ID Manually
+                    ⌨️ Tracking ID ရိုက်ထည့်မည်
                 </button>
             `;
             
             document.getElementById('app-content').innerHTML = content;
+        }
+        
+        function startCameraScanner() {
+            const qrReaderDiv = document.getElementById('qr-reader');
+            qrReaderDiv.style.display = 'block';
             
-            const html5QrCode = new Html5Qrcode("qr-reader");
+            html5QrCode = new Html5Qrcode("qr-reader");
+            
+            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+            
             html5QrCode.start(
                 { facingMode: "environment" },
-                { fps: 10, qrbox: 250 },
+                config,
                 (decodedText) => {
-                    html5QrCode.stop();
-                    const url = new URL(decodedText);
-                    const id = url.searchParams.get('id');
-                    if (id) {
-                        window.location.search = '?id=' + id;
-                    }
+                    html5QrCode.stop().then(() => {
+                        processQRCode(decodedText);
+                    });
+                },
+                (errorMessage) => {
+                    // Ignore continuous scanning errors
                 }
             ).catch(err => {
                 console.log('QR Scanner error:', err);
-                enterManually();
+                showError('Camera access မရပါ။ QR ပုံ upload လုပ်ပါ။');
             });
         }
         
+        function handleQRImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = document.getElementById('qr-image-preview');
+                img.src = e.target.result;
+                img.style.display = 'block';
+                
+                // Create image element for jsQR
+                const image = new Image();
+                image.src = e.target.result;
+                
+                image.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.width = image.width;
+                    canvas.height = image.height;
+                    context.drawImage(image, 0, 0);
+                    
+                    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                    const code = jsQR(imageData.data, imageData.width, imageData.height);
+                    
+                    const resultDiv = document.getElementById('qr-scan-result');
+                    
+                    if (code) {
+                        resultDiv.innerHTML = '<div class="success">✓ QR Code ဖတ်ပြီးပါပြီ!</div>';
+                        setTimeout(() => {
+                            processQRCode(code.data);
+                        }, 500);
+                    } else {
+                        resultDiv.innerHTML = '<div class="error">❌ QR Code မတွေ့ပါ။ ထပ်စမ်းကြည့်ပါ။</div>';
+                    }
+                };
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        function processQRCode(decodedText) {
+            try {
+                // Try to parse as URL
+                const url = new URL(decodedText);
+                const id = url.searchParams.get('id');
+                if (id) {
+                    trackingId = id;
+                    window.location.search = '?id=' + id;
+                } else {
+                    // If no 'id' param, try using the whole text as ID
+                    trackingId = decodedText;
+                    window.location.search = '?id=' + decodedText;
+                }
+            } catch (e) {
+                // Not a URL, treat as direct tracking ID
+                trackingId = decodedText;
+                window.location.search = '?id=' + decodedText;
+            }
+        }
+        
         function enterManually() {
-            const id = prompt('Enter Tracking ID:');
+            const id = prompt('Tracking ID ထည့်ပါ / Enter Tracking ID:');
             if (id) {
+                trackingId = id;
                 window.location.search = '?id=' + id;
             }
         }
@@ -1178,10 +828,29 @@
                     title: 'Track Your Order',
                     text: 'View tracking information',
                     url: url
+                }).catch(err => {
+                    // Fallback to copy
+                    copyToClipboard(url);
                 });
             } else {
-                navigator.clipboard.writeText(url);
-                alert('Link copied to clipboard!');
+                copyToClipboard(url);
+            }
+        }
+        
+        function copyToClipboard(text) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showSuccess('Link copied to clipboard! / Link ကူးပြီးပါပြီ!');
+                });
+            } else {
+                // Fallback for older browsers
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showSuccess('Link copied! / Link ကူးပြီးပါပြီ!');
             }
         }
         
@@ -1212,6 +881,13 @@
                 minute: '2-digit'
             });
         }
+        
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (html5QrCode) {
+                html5QrCode.stop();
+            }
+        });
     </script>
 </body>
 </html>
