@@ -249,10 +249,33 @@
             transform: scale(1.05);
         }
         
-        .tracking-image-item img {
+        .tracking-image-item img,
+        .tracking-image-item video {
             width: 100%;
             height: 100%;
             object-fit: cover;
+        }
+        
+        .video-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+        
+        .video-indicator::after {
+            content: '▶';
+            color: white;
+            font-size: 20px;
+            margin-left: 3px;
         }
         
         .tracking-image-meta {
@@ -562,7 +585,8 @@
             overflow: hidden;
         }
         
-        .preview-item img {
+        .preview-item img,
+        .preview-item video {
             width: 100%;
             height: 100%;
             object-fit: cover;
@@ -691,6 +715,14 @@
             max-height: 85%;
             border-radius: 8px;
             transition: opacity 0.2s ease-in-out;
+            display: block;
+        }
+        
+        .modal-video {
+            max-width: 90%;
+            max-height: 85%;
+            border-radius: 8px;
+            display: none;
         }
 
         .close-modal {
@@ -762,7 +794,7 @@
             z-index: 1001;
         }
 
-        .modal-save-btn {
+        .modal-save-blefttn {
             position: absolute;
             bottom: 20px;
             left: 50%;
@@ -831,9 +863,13 @@
         <button class="modal-nav prev" id="prevBtn" onclick="navigateGallery(-1)">‹</button>
         <button class="modal-nav next" id="nextBtn" onclick="navigateGallery(1)">›</button>
         <img class="modal-content" id="modalImage">
+        <video class="modal-video" id="modalVideo" controls>
+            <source src="" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
         <div class="modal-counter" id="modalCounter"></div>
         <button class="modal-save-btn" onclick="saveCurrentImage()">
-            💾 Save Image
+            💾 Save Media
         </button>
     </div>
     
@@ -1150,7 +1186,7 @@
                         </div>
                         <div class="tracking-detail-card">
                             <div class="tracking-detail-label">Location</div>
-                            <div class="tracking-detail-value tracking-location-value">${tracking.last_location || 'Unknown'}</div>
+                             <div class="tracking-detail-value tracking-location-value">${tracking.last_location || 'Unknown'}</div>
                         </div>
                     </div>
 
@@ -1216,7 +1252,7 @@
                         <div class="file-input-wrapper">
                             <label class="file-input-button">
                                 Choose Images
-                                <input type="file" multiple accept="image/*" onchange="handleFileSelect(event)">
+                                <input type="file" multiple accept="image/*,video/*" onchange="handleFileSelect(event)">
                             </label>
                         </div>
                         <div id="imagePreview" class="image-preview"></div>
@@ -1259,20 +1295,34 @@
                     
                     let html = `
                         <div class="tracking-images-section">
-                            <h3>🖼️ Tracking Images (${images.length})</h3>
+                            <h3>🖼️ Photos & Videos (${images.length})</h3>
                             <div class="tracking-images-grid">
                     `;
                     
                     images.forEach(img => {
                         const date = img.uploaded_at ? formatDate(new Date(img.uploaded_at)) : 'Unknown';
-                        html += `
-                            <div class="tracking-image-item" onclick="openModal('${img.url}')">
-                                <img src="${img.url}" alt="${img.name || 'Tracking image'}">
-                                <div class="tracking-image-meta">
-                                    ${date}
+                        const isVideo = img.type && img.type.startsWith('video/');
+                        
+                        if (isVideo) {
+                            html += `
+                                <div class="tracking-image-item" onclick="openModal('${img.url}', 'video')">
+                                    <video src="${img.url}" muted></video>
+                                    <div class="video-indicator"></div>
+                                    <div class="tracking-image-meta">
+                                        ${date}
+                                    </div>
                                 </div>
-                            </div>
-                        `;
+                            `;
+                        } else {
+                            html += `
+                                <div class="tracking-image-item" onclick="openModal('${img.url}', 'image')">
+                                    <img src="${img.url}" alt="${img.name || 'Tracking image'}">
+                                    <div class="tracking-image-meta">
+                                        ${date}
+                                    </div>
+                                </div>
+                            `;
+                        }
                     });
                     
                     html += `
@@ -1293,21 +1343,36 @@
         let touchStartX = 0;
         let touchEndX = 0;
 
-        function openModal(imageUrl, imagesArray = null, startIndex = 0) {
+        function openModal(imageUrl, type = 'image', imagesArray = null, startIndex = 0) {
             const modal = document.getElementById('imageModal');
             const modalImg = document.getElementById('modalImage');
+            const modalVideo = document.getElementById('modalVideo');
             
             // Set up gallery
             if (imagesArray && Array.isArray(imagesArray) && imagesArray.length > 0) {
                 currentGalleryImages = imagesArray;
                 currentGalleryIndex = startIndex;
             } else {
-                currentGalleryImages = [imageUrl];
+                currentGalleryImages = [{url: imageUrl, type: type}];
                 currentGalleryIndex = 0;
             }
             
-            // Display current image
-            modalImg.src = currentGalleryImages[currentGalleryIndex];
+            // Display current media
+            const currentMedia = currentGalleryImages[currentGalleryIndex];
+            const mediaType = currentMedia.type || type;
+            
+            if (mediaType === 'video') {
+                modalImg.style.display = 'none';
+                modalVideo.style.display = 'block';
+                modalVideo.querySelector('source').src = currentMedia.url || imageUrl;
+                modalVideo.load();
+                modalVideo.play();
+            } else {
+                modalVideo.style.display = 'none';
+                modalImg.style.display = 'block';
+                modalImg.src = currentMedia.url || imageUrl;
+            }
+            
             modal.classList.add('active');
             
             // Update counter and navigation buttons
@@ -1317,18 +1382,28 @@
             document.addEventListener('keydown', handleKeyNavigation);
             
             // Add touch/swipe support
-            modalImg.addEventListener('touchstart', handleTouchStart, { passive: true });
-            modalImg.addEventListener('touchend', handleTouchEnd, { passive: true });
+            const displayElement = mediaType === 'video' ? modalVideo : modalImg;
+            displayElement.addEventListener('touchstart', handleTouchStart, { passive: true });
+            displayElement.addEventListener('touchend', handleTouchEnd, { passive: true });
         }
 
         function closeModal() {
             const modal = document.getElementById('imageModal');
             const modalImg = document.getElementById('modalImage');
+            const modalVideo = document.getElementById('modalVideo');
             
             modal.classList.remove('active');
+            
+            // Pause video if playing
+            if (!modalVideo.paused) {
+                modalVideo.pause();
+            }
+            
             document.removeEventListener('keydown', handleKeyNavigation);
             modalImg.removeEventListener('touchstart', handleTouchStart);
             modalImg.removeEventListener('touchend', handleTouchEnd);
+            modalVideo.removeEventListener('touchstart', handleTouchStart);
+            modalVideo.removeEventListener('touchend', handleTouchEnd);
         }
 
         function handleTouchStart(e) {
@@ -1542,10 +1617,22 @@
                 reader.onload = (e) => {
                     const div = document.createElement('div');
                     div.className = 'preview-item';
-                    div.innerHTML = `
-                         <img src="${e.target.result}" alt="Preview">
-                        <button onclick="removeFile(${index})">×</button>
-                    `;
+                    
+                    const isVideo = file.type.startsWith('video/');
+                    
+                    if (isVideo) {
+                        div.innerHTML = `
+                            <video src="${e.target.result}" muted style="width: 100%; height: 100%; object-fit: cover;"></video>
+                            <div class="video-indicator"></div>
+                            <button onclick="removeFile(${index})">×</button>
+                        `;
+                    } else {
+                        div.innerHTML = `
+                            <img src="${e.target.result}" alt="Preview">
+                            <button onclick="removeFile(${index})">×</button>
+                        `;
+                    }
+                    
                     previewContainer.appendChild(div);
                 };
                 reader.readAsDataURL(file);
@@ -1553,7 +1640,7 @@
             
             if (files.length > 0) {
                 uploadBtn.classList.remove('hidden');
-                uploadBtn.textContent = `⬆️ Upload ${files.length} Image(s)`;
+                uploadBtn.textContent = `⬆️ Upload ${files.length} File(s)`;
             } else {
                 uploadBtn.classList.add('hidden');
             }
@@ -1567,7 +1654,7 @@
         
         function uploadImages() {
             if (selectedFiles.length === 0) {
-                showError('Please select images first');
+  showError('Please select images first');
                 return;
             }
             
@@ -1590,6 +1677,7 @@
                     const imageData = {
                         url: downloadURL,
                         name: file.name,
+                        type: file.type,
                         uploaded_by: currentUserId,
                         uploaded_at: firebase.database.ServerValue.TIMESTAMP
                     };
@@ -1603,8 +1691,8 @@
                         document.getElementById('imagePreview').innerHTML = '';
                         uploadBtn.classList.add('hidden');
                         uploadBtn.disabled = false;
-                        uploadBtn.textContent = '⬆️ Upload Images';
-                        showSuccess('Images uploaded successfully!');
+                        uploadBtn.textContent = '⬆️ Upload Files';
+                        showSuccess('Files uploaded successfully!');
                     }
                 }).catch((error) => {
                     showError('Upload failed: ' + error.message);
