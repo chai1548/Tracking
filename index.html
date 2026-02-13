@@ -1120,7 +1120,12 @@
                     // Create media items array (supports both images and videos)
                     const mediaItems = [];
                     
-                    if (isVideo && imageArray.length === 1) {
+                    // Add video_url if exists (separate field)
+                    if (post.video_url && post.video_url !== 'null') {
+                        mediaItems.push({ type: 'video', url: post.video_url });
+                    }
+                    
+                    if (isVideo && imageArray.length === 1 && !post.video_url) {
                         mediaItems.push({ type: 'video', url: imageArray[0] });
                     } else {
                         imageArray.forEach(url => {
@@ -1144,7 +1149,7 @@
                         
                         if (media.type === 'video') {
                             content += `
-                                <video controls controlsList="nodownload" style="width: 100%; max-height: 500px;">
+                                <video controls controlsList="nodownload" playsinline style="width: 100%; max-height: 500px;">
                                     <source src="${media.url}" type="video/mp4">
                                     Your browser does not support the video tag.
                                 </video>
@@ -1184,6 +1189,20 @@
                             </div>
                         `;
                     }
+                } else if (post.video_url && post.video_url !== 'null') {
+                    // Only video_url exists (no post.data)
+                    content += `
+                        <div class="swiper" id="postSwiper">
+                            <div class="swiper-wrapper">
+                                <div class="swiper-slide">
+                                    <video controls controlsList="nodownload" playsinline style="width: 100%; max-height: 500px;">
+                                        <source src="${post.video_url}" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                </div>
+                            </div>
+                        </div>
+                    `;
                 }
 
                 // Display description
@@ -1252,7 +1271,7 @@
                 </div>
             `;
             
-            // Tracking Images section placeholder
+  // Tracking Images section placeholder
             content += '<div id="tracking-images-container"></div>';
             
 // Comments section (only if post exists)
@@ -1277,7 +1296,7 @@
                             ${[1,2,3,4,5].map(i => `<span class="star" onclick="setRating(${i})">★</span>`).join('')}
                         </div>
                         <textarea id="feedback-text" placeholder="Share your experience..."></textarea>
-             <button class="btn btn-success" style="width: 100%; margin-top: 10px;" onclick="submitFeedback()">
+                        <button class="btn btn-success" style="width: 100%; margin-top: 10px;" onclick="submitFeedback()">
                             Submit Feedback
                         </button>
                     </div>
@@ -1719,7 +1738,7 @@
             if (files.length > 0) {
                 uploadBtn.classList.remove('hidden');
                 uploadBtn.textContent = `⬆️ Upload ${files.length} File(s)`;
-            } else {
+          } else {
                 uploadBtn.classList.add('hidden');
             }
         }
@@ -1751,7 +1770,7 @@
                 
                 uploadTask.then((snapshot) => {
                     return snapshot.ref.getDownloadURL();
-         }).then((downloadURL) => {
+                }).then((downloadURL) => {
                     const imageData = {
                         url: downloadURL,
                         name: file.name,
