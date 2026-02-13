@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Post Tracking</title>
+    
+    <!-- Swiper CSS for image carousel -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    
     <style>
         * {
             margin: 0;
@@ -106,6 +110,71 @@
             max-height: 500px;
             display: block;
         }
+        
+        /* SWIPER CAROUSEL STYLES */
+        .swiper {
+            width: 100%;
+            height: 500px;
+            border-radius: 12px;
+            background: #000;
+        }
+        
+        .swiper-slide {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+        }
+        
+        .swiper-slide img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            cursor: pointer;
+        }
+        
+        .swiper-slide video {
+            max-width: 100%;
+            max-height: 100%;
+            width: 100%;
+        }
+        
+        .swiper-pagination {
+            bottom: 10px !important;
+        }
+        
+        .swiper-pagination-bullet {
+            background: white !important;
+            opacity: 0.7 !important;
+        }
+        
+        .swiper-pagination-bullet-active {
+            opacity: 1 !important;
+            background: #667eea !important;
+        }
+        
+        .swiper-button-prev,
+        .swiper-button-next {
+            color: white !important;
+            background: rgba(0, 0, 0, 0.5);
+            width: 40px !important;
+            height: 40px !important;
+            border-radius: 50%;
+        }
+        
+        .swiper-button-prev:after,
+        .swiper-button-next:after {
+            font-size: 20px !important;
+        }
+        
+        .media-counter {
+            text-align: center;
+            color: #64748b;
+            font-size: 14px;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+        
         
         .post-description {
             padding: 15px;
@@ -726,7 +795,7 @@
         }
 
         .close-modal {
-            position: absolute;
+       position: absolute;
             top: 20px;
             right: 35px;
             color: #f1f1f1;
@@ -878,6 +947,9 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+    
+    <!-- Swiper JS for image carousel -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     
     <script>
         // Firebase config (replace with your config)
@@ -1043,96 +1115,72 @@
                     
                     // Check if it's a video
                     const isVideo = post.post_type === 'video' || 
-                                  (imageArray[0] && (imageArray[0].includes('.mp4') || imageArray[0].includes('.webm')));
+                                  (imageArray[0] && (imageArray[0].includes('.mp4') || imageArray[0].includes('.webm') || imageArray[0].includes('video')));
+                    
+                    // Create media items array (supports both images and videos)
+                    const mediaItems = [];
                     
                     if (isVideo && imageArray.length === 1) {
-                        content += `
-                            <div class="post-media-container">
-                                <video class="post-main-video" controls>
-                                    <source src="${imageArray[0]}" type="video/mp4">
+                        mediaItems.push({ type: 'video', url: imageArray[0] });
+                    } else {
+                        imageArray.forEach(url => {
+                            // Check each item if it's a video or image
+                            if (url.includes('.mp4') || url.includes('.webm') || url.includes('video')) {
+                                mediaItems.push({ type: 'video', url: url });
+                            } else {
+                                mediaItems.push({ type: 'image', url: url });
+                            }
+                        });
+                    }
+                    
+                    // Use Swiper for media carousel
+                    content += `
+                        <div class="swiper" id="postSwiper">
+                            <div class="swiper-wrapper">
+                    `;
+                    
+                    mediaItems.forEach((media, index) => {
+                        content += '<div class="swiper-slide">';
+                        
+                        if (media.type === 'video') {
+                            content += `
+                                <video controls controlsList="nodownload" style="width: 100%; max-height: 500px;">
+                                    <source src="${media.url}" type="video/mp4">
                                     Your browser does not support the video tag.
                                 </video>
-                            </div>
-                        `;
-                    } else if (imageArray.length === 1) {
-                        // Single image
-                        content += `
-                            <div class="post-media-container">
-                                <img src="${imageArray[0]}" alt="Post" class="post-main-image" onclick="openModal('${imageArray[0]}', window.currentPostImages, 0)"
-                                     onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Crect fill=\'%23ddd\' width=\'100\' height=\'100\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' fill=\'%23999\'%3ENo Image%3C/text%3E%3C/svg%3E'">
-                            </div>
-                        `;
-                    } else if (imageArray.length === 2) {
-                        // Two images - side by side
-                        content += `
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
-                                <div class="post-media-container" style="height: 300px;">
-                                    <img src="${imageArray[0]}" alt="Post Image 1" class="post-main-image" 
-                                         style="height: 100%; object-fit: cover;" onclick="openModal('${imageArray[0]}', window.currentPostImages, 0)"
-                                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Crect fill=\'%23ddd\' width=\'100\' height=\'100\'/%3E%3C/svg%3E'">
-                                </div>
-                                <div class="post-media-container" style="height: 300px;">
-                                    <img src="${imageArray[1]}" alt="Post Image 2" class="post-main-image" 
-                                         style="height: 100%; object-fit: cover;" onclick="openModal('${imageArray[1]}', window.currentPostImages, 1)"
-                                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Crect fill=\'%23ddd\' width=\'100\' height=\'100\'/%3E%3C/svg%3E'">
-                                </div>
-                            </div>
-                        `;
-                    } else if (imageArray.length === 3) {
-                        // Three images layout
-                        content += `
-                            <div style="display: grid; gap: 10px; margin-bottom: 15px;">
-                                <div class="post-media-container" style="height: 300px;">
-                                    <img src="${imageArray[0]}" alt="Post Image 1" class="post-main-image" 
-                                         style="height: 100%; object-fit: cover;" onclick="openModal('${imageArray[0]}', window.currentPostImages, 0)"
-                                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Crect fill=\'%23ddd\' width=\'100\' height=\'100\'/%3E%3C/svg%3E'">
-                                </div>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                                    <div class="post-media-container" style="height: 200px;">
-                                        <img src="${imageArray[1]}" alt="Post Image 2" class="post-main-image" 
-                                             style="height: 100%; object-fit: cover;" onclick="openModal('${imageArray[1]}', window.currentPostImages, 1)"
-                                             onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Crect fill=\'%23ddd\' width=\'100\' height=\'100\'/%3E%3C/svg%3E'">
-                                    </div>
-                                    <div class="post-media-container" style="height: 200px;">
-                                        <img src="${imageArray[2]}" alt="Post Image 3" class="post-main-image" 
-                                             style="height: 100%; object-fit: cover;" onclick="openModal('${imageArray[2]}', window.currentPostImages, 2)"
-                                             onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Crect fill=\'%23ddd\' width=\'100\' height=\'100\'/%3E%3C/svg%3E'">
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    } else {
-                        // Four or more images - 2x2 grid
-                        content += `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">`;
-                        
-                        for (let i = 0; i < Math.min(4, imageArray.length); i++) {
-                            const isLast = i === 3 && imageArray.length > 4;
+                            `;
+                        } else {
                             content += `
-                                <div class="post-media-container" style="height: 200px; position: relative;">
-                                    <img src="${imageArray[i]}" alt="Post Image ${i+1}" class="post-main-image" 
-                                         style="height: 100%; object-fit: cover;" onclick="openModal('${imageArray[i]}', window.currentPostImages, ${i})"
-                                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Crect fill=\'%23ddd\' width=\'100\' height=\'100\'/%3E%3C/svg%3E'">
-                                    ${isLast ? `
-                                        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; 
-                                                    background: rgba(0,0,0,0.6); display: flex; align-items: center; 
-                                                    justify-content: center; color: white; font-size: 32px; font-weight: bold;
-                                                    cursor: pointer; border-radius: 12px;" 
-                                                    onclick="openModal('${imageArray[i]}', window.currentPostImages, ${i})">
-                                            +${imageArray.length - 4}
-                                        </div>
-                                    ` : ''}
-                                </div>
+                                <img src="${media.url}" alt="Post Image ${index + 1}" 
+                                     onclick="openModal('${media.url}', window.currentPostImages, ${index})"
+                                     onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'%3E%3Crect fill=\\'%23ddd\\' width=\\'100\\' height=\\'100\\'/%3E%3C/svg%3E'">
                             `;
                         }
                         
-                        content += `</div>`;
-                    }
+                        content += '</div>';
+                    });
                     
-                    // Show image count
-                    if (imageArray.length > 1) {
+                    content += `
+                            </div>
+                            ${mediaItems.length > 1 ? `
+                                <div class="swiper-pagination"></div>
+                                <div class="swiper-button-prev"></div>
+                                <div class="swiper-button-next"></div>
+                            ` : ''}
+                        </div>
+                    `;
+                    
+                    // Show media count
+                    if (mediaItems.length > 1) {
+                        const imageCount = mediaItems.filter(m => m.type === 'image').length;
+                        const videoCount = mediaItems.filter(m => m.type === 'video').length;
+                        let mediaText = [];
+                        if (imageCount > 0) mediaText.push(`📷 ${imageCount} Photo${imageCount > 1 ? 's' : ''}`);
+                        if (videoCount > 0) mediaText.push(`🎥 ${videoCount} Video${videoCount > 1 ? 's' : ''}`);
+                        
                         content += `
-                            <div style="text-align: center; color: #64748b; font-size: 14px; margin-top: 10px;">
-                                📷 ${imageArray.length} Photos
+                            <div class="media-counter">
+                                ${mediaText.join(' • ')}
                             </div>
                         `;
                     }
@@ -1229,7 +1277,7 @@
                             ${[1,2,3,4,5].map(i => `<span class="star" onclick="setRating(${i})">★</span>`).join('')}
                         </div>
                         <textarea id="feedback-text" placeholder="Share your experience..."></textarea>
-                        <button class="btn btn-success" style="width: 100%; margin-top: 10px;" onclick="submitFeedback()">
+             <button class="btn btn-success" style="width: 100%; margin-top: 10px;" onclick="submitFeedback()">
                             Submit Feedback
                         </button>
                     </div>
@@ -1264,6 +1312,36 @@
             }
             
             document.getElementById('app-content').innerHTML = content;
+            
+            // Initialize Swiper for post media carousel
+            setTimeout(() => {
+                const swiperEl = document.getElementById('postSwiper');
+                if (swiperEl) {
+                    const postSwiper = new Swiper('#postSwiper', {
+                        slidesPerView: 1,
+                        spaceBetween: 0,
+                        pagination: {
+                            el: '.swiper-pagination',
+                            clickable: true,
+                        },
+                        navigation: {
+                            nextEl: '.swiper-button-next',
+                            prevEl: '.swiper-button-prev',
+                        },
+                        keyboard: {
+                            enabled: true,
+                        },
+                        on: {
+                            slideChange: function() {
+                                // Pause all videos when sliding
+                                document.querySelectorAll('#postSwiper video').forEach(video => {
+                                    video.pause();
+                                });
+                            }
+                        }
+                    });
+                }
+            }, 100);
             
             // Generate QR code if URL exists
             if (tracking.tracking_url) {
@@ -1673,7 +1751,7 @@
                 
                 uploadTask.then((snapshot) => {
                     return snapshot.ref.getDownloadURL();
-                }).then((downloadURL) => {
+         }).then((downloadURL) => {
                     const imageData = {
                         url: downloadURL,
                         name: file.name,
