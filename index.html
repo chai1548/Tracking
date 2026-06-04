@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAI Tracking</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0D0D1A;--card:#12122A;--card2:#1A1A35;
+  --accent:#00E676;--red:#FF554F;--blue:#2979FF;
+  --purple:#AA00FF;--orange:#FF9800;--yellow:#FFD600;
+  --text:#FFFFFF;--sub:#8888AA;--border:#2A2A5A;
+}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh}
+a{color:inherit;text-decoration:none}
+
+/* ── HEADER ── */
+.header{background:linear-gradient(135deg,#1a1a3e,#0d0d25);padding:0;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;display:flex;flex-direction:column}
+.header-main{padding:10px 14px;display:flex;align-items:center;gap:10px;width:100%}
+.header-logo{background:linear-gradient(135deg,#e05c1a,#1565c0);width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:900;color:#fff;flex-shrink:0;letter-spacing:1px;box-shadow:0 2px 10px rgba(224,92,26,.4)}
+.header h1{font-size:15px;font-weight:800;letter-spacing:.3px}
+.header p{font-size:10px;color:var(--sub);margin-top:1px}
+.header-right{margin-left:auto;display:flex;gap:6px}
+.hbtn{background:var(--card2);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:20px;font-size:12px;cursor:pointer;transition:.2s}
+.hbtn:hover{background:var(--border)}
+/* MARQUEE */
+.header-ticker{width:100%;background:rgba(0,230,118,.08);border-top:1px solid rgba(0,230,118,.15);overflow:hidden;height:26px;display:flex;align-items:center}
+.ticker-inner{display:flex;align-items:center;white-space:nowrap;animation:ticker-scroll 30s linear infinite}
+.ticker-inner:hover{animation-play-state:paused}
+@keyframes ticker-scroll{0%{transform:translateX(100vw)}100%{transform:translateX(-100%)}}
+.ticker-text{font-size:11px;color:#00E676;font-weight:600;padding:0 40px}
+.ticker-sep{color:rgba(0,230,118,.4);font-size:10px}
+
+/* ── TABS ── */
+.tab-bar{display:flex;background:var(--card);border-bottom:1px solid var(--border)}
+.tab-btn{flex:1;padding:11px 8px;font-size:12px;font-weight:700;border:none;background:transparent;color:var(--sub);cursor:pointer;border-bottom:3px solid transparent;transition:.2s;font-family:inherit}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-pane{display:none}
+.tab-pane.active{display:block}
+
+.container{max-width:800px;margin:0 auto;padding:14px}
+
+/* ── SEARCH ── */
+.search-wrap{display:flex;gap:8px;margin-bottom:18px}
+.search-input{flex:1;background:var(--card);border:1px solid var(--border);color:var(--text);padding:11px 14px;border-radius:12px;font-size:14px;outline:none;transition:.2s}
+.search-input:focus{border-color:var(--accent)}
+.search-btn{background:var(--accent);color:#000;border:none;padding:11px 18px;border-radius:12px;font-weight:700;cursor:pointer;font-size:14px}
+.qr-btn{background:var(--card2);border:1px solid var(--border);color:var(--text);padding:11px 14px;border-radius:12px;cursor:pointer;font-size:18px}
+
+/* ── CARDS ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px}
+.card-title{font-size:12px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.status-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700}
+.s-active{background:rgba(0,230,118,.15);color:var(--accent);border:1px solid rgba(0,230,118,.3)}
+.s-done{background:rgba(41,121,255,.15);color:var(--blue);border:1px solid rgba(41,121,255,.3)}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.info-item{background:var(--card2);border-radius:10px;padding:10px 12px}
+.info-label{font-size:10px;color:var(--sub);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px}
+.info-value{font-size:13px;font-weight:700;color:var(--text);word-break:break-word}
+@media(max-width:400px){.info-grid{grid-template-columns:1fr}}
+.progress-wrap{margin:10px 0}
+.progress-track{background:var(--card2);border-radius:99px;height:8px;overflow:hidden}
+.progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),#00BFA5);transition:width .6s ease}
+.progress-labels{display:flex;justify-content:space-between;font-size:9px;color:var(--sub);margin-top:4px}
+#tracking-map{height:320px;border-radius:12px;border:1px solid var(--border);overflow:hidden}
+.map-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.legend-item{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--sub)}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.loc-card{background:linear-gradient(135deg,#0d1a2e,#1a1a3e);border:1px solid #1E3A5F;border-radius:16px;padding:16px;margin-bottom:14px}
+.loc-city-name{font-size:22px;font-weight:800;margin-bottom:4px}
+.loc-step-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(0,230,118,.15);color:var(--accent);border:1px solid rgba(0,230,118,.3);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;margin-bottom:10px}
+.loc-update{font-size:11px;color:var(--sub);margin-top:8px}
+.loc-pulse{width:12px;height:12px;border-radius:50%;background:var(--accent);animation:pulse 1.5s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(0,230,118,.4)}70%{box-shadow:0 0 0 10px rgba(0,230,118,0)}100%{box-shadow:0 0 0 0 rgba(0,230,118,0)}}
+.timeline{position:relative;padding-left:30px}
+.timeline::before{content:'';position:absolute;left:9px;top:0;bottom:0;width:2px;background:var(--border)}
+.tl-item{position:relative;margin-bottom:14px}
+.tl-dot{position:absolute;left:-26px;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;border:2px solid var(--bg)}
+.tl-dot.done{background:var(--accent);color:#000}
+.tl-dot.active{background:var(--orange);color:#000;box-shadow:0 0 10px rgba(255,152,0,.7);animation:pulse2 1s infinite}
+.tl-dot.pending{background:var(--card2);color:var(--sub);border-color:var(--border)}
+@keyframes pulse2{0%,100%{box-shadow:0 0 8px rgba(255,152,0,.7)}50%{box-shadow:0 0 18px rgba(255,152,0,.9)}}
+.tl-content{background:var(--card2);border-radius:10px;padding:10px 12px;border-left:3px solid transparent}
+.tl-content.done{border-left-color:var(--accent)}
+.tl-content.active{border-left-color:var(--orange);background:#1a1a25}
+.tl-label{font-size:13px;font-weight:700}
+.tl-time{font-size:11px;color:var(--sub);margin-top:2px}
+.tl-status{font-size:10px;margin-top:2px;font-weight:600}
+.comment-item{display:flex;gap:10px;margin-bottom:12px}
+.comment-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#1565C0,#0D47A1);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.comment-bubble{background:var(--card2);border-radius:12px;padding:9px 12px;flex:1;min-width:0}
+.comment-name{font-size:12px;font-weight:700;color:var(--accent);margin-bottom:3px}
+.comment-text{font-size:13px;line-height:1.4;word-break:break-word}
+.comment-time-small{font-size:10px;color:var(--sub);margin-top:4px}
+.comment-location{font-size:10px;color:var(--orange);margin-top:2px;display:flex;align-items:center;gap:3px}
+.btn{padding:10px 18px;border-radius:12px;border:none;font-size:13px;font-weight:700;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--accent);color:#000}
+.btn-secondary{background:var(--card2);color:var(--text);border:1px solid var(--border)}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal-box{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:22px;max-width:380px;width:100%}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:14px;text-align:center}
+#qr-reader-container{margin:10px 0;border-radius:12px;overflow:hidden}
+.modal-close{display:block;margin:12px auto 0;background:var(--card2);border:1px solid var(--border);color:var(--text);padding:10px 24px;border-radius:12px;cursor:pointer;font-size:13px}
+.stars{display:flex;gap:4px;margin:8px 0}
+.star{font-size:26px;cursor:pointer;color:var(--border);transition:.15s}
+.star.active{color:var(--yellow)}
+.feedback-textarea{width:100%;background:var(--card2);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:10px;font-size:13px;resize:vertical;min-height:70px;outline:none;margin-top:6px}
+.feedback-item-dark{background:var(--card2);border-radius:10px;padding:10px;margin-bottom:8px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--card);border:1px solid var(--accent);color:var(--text);padding:10px 20px;border-radius:20px;font-size:13px;z-index:9999;transition:.3s;opacity:0;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.loader{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:50px 20px;gap:12px}
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hidden{display:none!important}
+.voucher{background:linear-gradient(135deg,#0a1628,#0d1a2e);border:1px solid var(--blue);border-radius:14px;padding:18px;position:relative;overflow:hidden}
+.voucher-row{display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,.04);padding:9px 12px;border-radius:9px;margin-bottom:6px}
+.voucher-key{font-size:11px;color:var(--sub)}
+.voucher-val{font-size:13px;font-weight:700}
+
+/* ── POST TRACKING TAB styles (adapted to dark theme) ── */
+.pt-section{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px}
+.pt-section h3{color:var(--text);font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.pt-swiper{width:100%;height:320px;border-radius:12px;background:#000;margin-bottom:10px}
+.pt-swiper .swiper-slide{display:flex;align-items:center;justify-content:center;background:#000}
+.pt-swiper .swiper-slide img{max-width:100%;max-height:100%;object-fit:contain;cursor:pointer}
+.pt-swiper .swiper-slide video{max-width:100%;max-height:100%;width:100%}
+.swiper-pagination-bullet{background:rgba(255,255,255,.5)!important}
+.swiper-pagination-bullet-active{background:var(--accent)!important}
+.swiper-button-prev,.swiper-button-next{color:var(--accent)!important}
+.pt-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.pt-detail-card{background:var(--card2);border-radius:10px;padding:10px 12px}
+.pt-detail-label{font-size:10px;color:var(--sub);margin-bottom:3px;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+.pt-detail-value{font-size:13px;font-weight:700;color:var(--text);word-break:break-all}
+@media(max-width:400px){.pt-detail-grid{grid-template-columns:1fr}}
+.pt-comment-item{background:var(--card2);border-radius:10px;padding:12px;margin-bottom:10px}
+.pt-comment-header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.pt-comment-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#1565C0,#0D47A1);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;flex-shrink:0;overflow:hidden}
+.pt-comment-avatar img{width:100%;height:100%;object-fit:cover}
+.pt-comment-username{font-size:13px;font-weight:700;color:var(--accent)}
+.pt-comment-time{font-size:10px;color:var(--sub)}
+.pt-comment-text{font-size:13px;color:var(--text);line-height:1.5}
+.pt-feedback-item{background:var(--card2);border-radius:10px;padding:10px;margin-bottom:8px}
+.pt-feedback-rating{color:var(--yellow);font-size:15px;margin-bottom:4px}
+.pt-feedback-text{font-size:13px;color:var(--text);line-height:1.5;margin-bottom:4px}
+.pt-feedback-meta{font-size:10px;color:var(--sub)}
+.pt-admin-item{background:var(--card2);border-radius:10px;padding:10px;margin-bottom:8px;border-left:3px solid var(--yellow)}
+.pt-admin-badge{background:var(--yellow);color:#000;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;margin-right:6px}
+.pt-admin-time{font-size:10px;color:var(--sub)}
+.pt-admin-text{font-size:13px;color:var(--text);line-height:1.5;margin-top:6px}
+.pt-img-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px}
+.pt-img-item{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;cursor:pointer;transition:.2s}
+.pt-img-item:hover{transform:scale(1.04)}
+.pt-img-item img,.pt-img-item video{width:100%;height:100%;object-fit:cover}
+.pt-img-meta{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.7));color:#fff;padding:6px;font-size:9px}
+.pt-video-indicator{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:36px;height:36px;background:rgba(0,0,0,.6);border-radius:50%;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.pt-video-indicator::after{content:'▶';color:#fff;font-size:14px;margin-left:2px}
+.pt-star-row{display:flex;gap:8px;margin:10px 0}
+.pt-star{font-size:28px;cursor:pointer;color:var(--border);transition:.15s}
+.pt-star.active{color:var(--yellow)}
+.pt-upload-section{background:var(--card2);border-radius:12px;padding:14px;margin-top:10px}
+.file-input-label{display:block;padding:10px;background:var(--blue);color:#fff;border-radius:10px;text-align:center;font-weight:700;font-size:13px;cursor:pointer}
+.pt-img-preview{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;margin-top:10px}
+.pt-preview-item{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden}
+.pt-preview-item img,.pt-preview-item video{width:100%;height:100%;object-fit:cover}
+.pt-preview-remove{position:absolute;top:3px;right:3px;background:rgba(220,38,38,.9);color:#fff;border:none;border-radius:50%;width:20px;height:20px;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center}
+.pt-post-stats{display:flex;gap:14px;padding:10px 0;font-size:13px;color:var(--sub)}
+.pt-post-stats span{color:var(--text);font-weight:700}
+
+/* ── LIGHTBOX (shared) ── */
+.lb-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:2000;align-items:center;justify-content:center}
+.lb-modal.active{display:flex}
+.lb-img{max-width:90%;max-height:85%;border-radius:8px;transition:opacity .2s}
+.lb-video{max-width:90%;max-height:85%;border-radius:8px;display:none}
+.lb-close{position:absolute;top:16px;right:20px;color:#fff;font-size:36px;cursor:pointer;z-index:2001;background:rgba(0,0,0,.5);width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:none}
+.lb-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.5);color:#fff;border:none;font-size:28px;padding:18px 14px;cursor:pointer;z-index:2001;border-radius:6px;transition:.2s}
+.lb-nav:hover{background:rgba(0,0,0,.75)}
+.lb-nav.prev{left:16px}
+.lb-nav.next{right:16px}
+.lb-counter{position:absolute;bottom:70px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.7);color:#fff;padding:6px 14px;border-radius:20px;font-size:13px;z-index:2001}
+.lb-save{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);background:var(--accent);color:#000;border:none;padding:10px 22px;border-radius:24px;font-size:14px;font-weight:700;cursor:pointer;z-index:2001}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-main">
+    <div class="header-logo">SAI</div>
+    <div>
+      <h1 id="header-title">SAI Transport</h1>
+      <p id="header-sub">Parcel Tracking System</p>
+    </div>
+    <div class="header-right">
+      <button class="hbtn" onclick="showQrModal()">📷 Scan</button>
+    </div>
+  </div>
+  <div class="header-ticker">
+    <div class="ticker-inner">
+      <span class="ticker-text">🚛 SAI Transport — BKK → မဲဆောက် → မြဝတီ → ဘားအံ → ပဲခူး → ရန်ကုန် → မန်လေး</span>
+      <span class="ticker-sep">✦</span>
+      <span class="ticker-text">📦 Tracking ID ထည့်ပြီး ကုန်ပစ္စည်း တည်နေရာ စစ်ပါ</span>
+      <span class="ticker-sep">✦</span>
+      <span class="ticker-text">📞 MAQ Office: 083 494 4787 &nbsp;|&nbsp; Ph: 09774904060, 09941287963</span>
+      <span class="ticker-sep">✦</span>
+    </div>
+  </div>
+  <!-- TABS -->
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tab-sai" onclick="switchTab('sai')">📦 SAI Tracking</button>
+    <button class="tab-btn" id="tab-post" onclick="switchTab('post')">🖼 Post Tracking</button>
+  </div>
+</div>
+
+<!-- TAB 1: SAI TRACKING -->
+<div class="tab-pane active" id="pane-sai">
+  <div class="container">
+    <div class="search-wrap">
+      <input class="search-input" id="search-input" type="text" placeholder="KST030626-268 ထည့်ပါ..." onkeydown="if(event.key==='Enter')doSearch()"/>
+      <button class="search-btn" onclick="doSearch()">🔍</button>
+      <button class="qr-btn" onclick="showQrModal()">📷</button>
+    </div>
+    <div id="app-content"></div>
+  </div>
+</div>
+
+<!-- TAB 2: POST TRACKING -->
+<div class="tab-pane" id="pane-post">
+  <div class="container">
+    <div class="search-wrap">
+      <input class="search-input" id="pt-search-input" type="text" placeholder="Tracking ID ထည့်ပါ..." onkeydown="if(event.key==='Enter')ptDoSearch()"/>
+      <button class="search-btn" onclick="ptDoSearch()">🔍</button>
+    </div>
+    <div id="pt-app-content">
+      <div class="card" style="text-align:center;padding:32px 20px">
+        <div style="font-size:48px;margin-bottom:10px">🖼</div>
+        <h2 style="margin-bottom:6px;font-size:16px">Post Tracking</h2>
+        <p style="color:var(--sub);font-size:12px">Tracking ID ထည့်ပြီး Post စစ်ပါ</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- QR MODAL -->
+<div class="modal-overlay hidden" id="qr-modal">
+  <div class="modal-box">
+    <div class="modal-title">📷 QR Scan</div>
+    <div id="qr-reader-container"></div>
+    <input class="search-input" id="manual-input" type="text" placeholder="သို့မဟုတ် ID ရိုက်ထည့်ပါ" style="margin-top:10px"/>
+    <div class="btn-row" style="justify-content:center;margin-top:10px">
+      <button class="btn btn-primary" onclick="doManualSearch()">ရှာမည်</button>
+      <button class="modal-close" onclick="closeQrModal()">✕ ပိတ်မည်</button>
+    </div>
+  </div>
+</div>
+
+<!-- LIGHTBOX (Post Tab) -->
+<div class="lb-modal" id="lbModal" onclick="event.target===this&&lbClose()">
+  <button class="lb-close" onclick="lbClose()">×</button>
+  <button class="lb-nav prev" id="lbPrev" onclick="lbNav(-1)">‹</button>
+  <button class="lb-nav next" id="lbNext" onclick="lbNav(1)">›</button>
+  <img class="lb-img" id="lbImg" src="">
+  <video class="lb-video" id="lbVideo" controls><source src="" type="video/mp4"></video>
+  <div class="lb-counter" id="lbCounter"></div>
+  <button class="lb-save" onclick="lbSave()">💾 Save</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Scripts -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+
+// ════════════════════════════════════════════
+// FIREBASE (shared)
+// ════════════════════════════════════════════
+const firebaseConfig = {
+  apiKey:            "AIzaSyB49vRPX8YaWuTP5GS3lsBDqdAaz_hJYAw",
+  authDomain:        "onlineshop-849c8.firebaseapp.com",
+  databaseURL:       "https://onlineshop-849c8-default-rtdb.firebaseio.com",
+  projectId:         "onlineshop-849c8",
+  storageBucket:     "onlineshop-849c8.appspot.com",
+  messagingSenderId: "883512833370",
+  appId:             "1:883512833370:android:185171fa84296e0dafef63"
+};
+firebase.initializeApp(firebaseConfig);
+const db      = firebase.database();
+const storage = firebase.storage();
+
+// ════════════════════════════════════════════
+// TAB SWITCH
+// ════════════════════════════════════════════
+function switchTab(name) {
+  ['sai','post'].forEach(t => {
+    document.getElementById('tab-'+t).classList.toggle('active', t===name);
+    document.getElementById('pane-'+t).classList.toggle('active', t===name);
+  });
+  document.getElementById('header-sub').textContent =
+    name==='sai' ? 'Parcel Tracking System' : 'Post Tracking System';
+}
+
+// ════════════════════════════════════════════
+// ════  TAB 1 — SAI TRACKING  ════
+// ════════════════════════════════════════════
+const ROUTE = [
+  { step:1,  label:'BKK',        lat:13.7563, lng:100.5018, color:'#FF1744', city:'Bangkok'  },
+  { step:2,  label:'မဲဆောက်',    lat:16.7167, lng:98.5667,  color:'#AA00FF', city:'Mae Sot'  },
+  { step:3,  label:'မြဝတီ IN',   lat:16.4494, lng:98.5070,  color:'#E91E63', city:'Myawaddy' },
+  { step:4,  label:'မြဝတီ OUT',  lat:16.4494, lng:98.5070,  color:'#FF5722', city:'Myawaddy' },
+  { step:5,  label:'ဘားအံ IN',   lat:17.3362, lng:97.6290,  color:'#2196F3', city:'Hpa-An'   },
+  { step:6,  label:'ဘားအံ OUT',  lat:17.3362, lng:97.6290,  color:'#03A9F4', city:'Hpa-An'   },
+  { step:7,  label:'ပဲခူး IN',   lat:17.3316, lng:96.4616,  color:'#FFD600', city:'Bago'     },
+  { step:8,  label:'ပဲခူး OUT',  lat:17.3316, lng:96.4616,  color:'#FFC107', city:'Bago'     },
+  { step:9,  label:'ရန်ကုန် IN', lat:16.8661, lng:96.1951,  color:'#4CAF50', city:'Yangon'   },
+  { step:10, label:'ရန်ကုန် OUT',lat:16.8661, lng:96.1951,  color:'#8BC34A', city:'Yangon'   },
+  { step:11, label:'မန်လေး IN',  lat:21.9588, lng:96.0891,  color:'#FF9800', city:'Mandalay' },
+  { step:12, label:'မန်လေး OUT', lat:21.9588, lng:96.0891,  color:'#FFD600', city:'Mandalay' },
+];
+let trackingId=null, saiData=null, locationData=null, commentsData=[];
+let leafletMap=null, driverMarker=null, html5QrCode=null;
+let currentRating=0, _locListener=null;
+
+window.onload = () => {
+  const id = new URLSearchParams(location.search).get('id') || new URLSearchParams(location.search).get('post_key');
+  if (id) { trackingId=id; document.getElementById('search-input').value=id; loadAll(id); }
+  else renderHome();
+};
+
+function doSearch(){
+  const v=document.getElementById('search-input').value.trim();
+  if(!v) return showToast('Tracking ID ထည့်ပါ');
+  history.pushState({},'','?id='+v);
+  trackingId=v; loadAll(v);
+}
+function doManualSearch(){
+  const v=document.getElementById('manual-input').value.trim();
+  if(!v) return;
+  closeQrModal();
+  document.getElementById('search-input').value=v;
+  trackingId=v; history.pushState({},'','?id='+v); loadAll(v);
+}
+
+function loadAll(id){
+  saiData=null; locationData=null; commentsData=[];
+  if(leafletMap){leafletMap.remove();leafletMap=null;driverMarker=null;}
+  if(_locListener){db.ref('post_locations/'+id).off('value',_locListener);}
+  document.getElementById('app-content').innerHTML='<div class="loader"><div class="spinner"></div><p style="color:var(--sub)">Loading...</p></div>';
+  let dS=false,dL=false,dC=false;
+  const tryR=()=>{if(dS&&dL&&dC)render();};
+  db.ref('sai_vouchers/'+id).once('value',s=>{saiData=s.exists()?s.val():null;dS=true;tryR();});
+  _locListener=db.ref('post_locations/'+id).on('value',s=>{
+    locationData=s.exists()?s.val():null;
+    if(!dL){dL=true;tryR();}else{if(document.getElementById('loc-live-card'))renderLocCard();if(leafletMap)updateDriverMarker();}
+  });
+  db.ref('posts/'+id+'/comments').once('value',s=>{
+    commentsData=[];
+    if(s.exists())s.forEach(c=>commentsData.push({key:c.key,...c.val()}));
+    commentsData.sort((a,b)=>(a.time||0)-(b.time||0));
+    dC=true;tryR();
+  });
+}
+
+function render(){
+  if(!saiData&&!locationData){
+    document.getElementById('app-content').innerHTML=`<div class="card" style="text-align:center;padding:40px"><div style="font-size:50px;margin-bottom:12px">🔍</div><p style="color:var(--sub);font-size:14px">Tracking ID မတွေ့ပါ</p><p style="color:var(--accent);font-size:13px;margin-top:6px;font-weight:700">${trackingId}</p><p style="color:var(--sub);font-size:12px;margin-top:6px">KST format: KST030626-268</p></div>`;
+    return;
+  }
+  const curStep=locationData?(locationData.current_step||0):0;
+  const pct=Math.round((curStep/12)*100);
+  const curRoute=ROUTE[Math.max(0,curStep-1)]||ROUTE[0];
+  const curLabel=curRoute.label;
+  document.getElementById('header-sub').textContent='KST: '+trackingId;
+  let html='';
+  html+=buildLocCard(curStep,curRoute,pct);
+  if(saiData)html+=buildCargoCard(saiData,trackingId);
+  html+=`<div class="card"><div class="card-title">🗺 Live Route Map</div><div id="tracking-map"></div><div class="map-legend"><div class="legend-item"><div class="legend-dot" style="background:#FF1744"></div>BKK</div><div class="legend-item"><div class="legend-dot" style="background:#AA00FF"></div>မဲဆောက်</div><div class="legend-item"><div class="legend-dot" style="background:#E91E63"></div>မြဝတီ</div><div class="legend-item"><div class="legend-dot" style="background:#2196F3"></div>ဘားအံ</div><div class="legend-item"><div class="legend-dot" style="background:#FFD600"></div>ပဲခူး</div><div class="legend-item"><div class="legend-dot" style="background:#4CAF50"></div>ရန်ကုန်</div><div class="legend-item"><div class="legend-dot" style="background:#FF9800"></div>မန်လေး</div><div class="legend-item"><div class="legend-dot" style="background:#FFD600;border:2px solid #fff"></div>🚛 Driver</div></div></div>`;
+  html+=`<div class="card"><div class="card-title">🗓 Journey Timeline</div><div class="timeline" id="timeline-container"></div></div>`;
+  html+=buildCommentsSection();
+  html+=buildVoucherSection(curStep,curLabel);
+  html+=`<div class="card"><div class="card-title">⭐ Feedback</div><div class="stars" id="star-row">${[1,2,3,4,5].map(i=>`<span class="star" onclick="setRating(${i})">★</span>`).join('')}</div><textarea class="feedback-textarea" id="feedback-text" placeholder="သင်၏ မှတ်ချက်..."></textarea><div class="btn-row"><button class="btn btn-primary" onclick="submitFeedback()">📨 ပို့မည်</button></div><div id="feedback-list" style="margin-top:14px"></div></div>`;
+  document.getElementById('app-content').innerHTML=html;
+  requestAnimationFrame(()=>{initMap();renderTimeline(curStep);loadFeedbacks();drawVoucherQr();});
+}
+
+function buildLocCard(curStep,curRoute,pct){
+  const updAt=locationData?(locationData.updated_at||locationData.scan_time||null):null;
+  const hasDriver=locationData&&locationData.driver_lat;
+  return `<div class="loc-card" id="loc-live-card"><div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><div class="loc-pulse"></div><span style="font-size:12px;font-weight:600;color:var(--accent)">LIVE TRACKING</span></div><div class="loc-city-name" style="color:${curRoute.color}">${curRoute.label}</div><div class="loc-step-badge">Step ${curStep} / 12 &nbsp;•&nbsp; ${pct}%</div><div class="progress-wrap"><div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div><div class="progress-labels"><span>BKK</span><span>မဲဆောက်</span><span>မြဝတီ</span><span>ဘားအံ</span><span>ပဲခူး</span><span>ရန်ကုန်</span><span>မန်လေး</span></div></div><div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap"><span class="status-badge ${curStep>=12?'s-done':'s-active'}">${curStep>=12?'✅ Delivered':'🚛 In Transit'}</span>${hasDriver?'<span class="status-badge s-active">📍 GPS Active</span>':''}</div>${updAt?`<div class="loc-update">🕐 Last scan: ${fmtDate(updAt)}</div>`:''}</div>`;
+}
+function renderLocCard(){
+  const el=document.getElementById('loc-live-card'); if(!el)return;
+  const s=locationData?(locationData.current_step||0):0;
+  const r=ROUTE[Math.max(0,s-1)]||ROUTE[0];
+  el.outerHTML=buildLocCard(s,r,Math.round((s/12)*100));
+}
+function buildCargoCard(d,id){
+  const dP=d.direction==='TH'?'<span style="background:#1565c0;color:#fff;padding:2px 10px;border-radius:6px;font-size:11px;font-weight:700">TH → MM</span>':'<span style="background:#c62828;color:#fff;padding:2px 10px;border-radius:6px;font-size:11px;font-weight:700">MM → TH</span>';
+  const pP=d.payment==='paid'?'<span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700">✅ Paid</span>':'<span style="background:#dc2626;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700">❌ Unpaid</span>';
+  return `<div class="card"><div class="card-title">📦 SAI Cargo Info &nbsp;${dP}</div><div class="info-grid"><div class="info-item"><div class="info-label">Tracking No.</div><div class="info-value" style="color:var(--accent);font-size:12px">${id}</div></div><div class="info-item"><div class="info-label">Date</div><div class="info-value" style="font-size:12px">${d.date||'—'}</div></div><div class="info-item"><div class="info-label">ပေးပို့သူ</div><div class="info-value">${d.sender_name||'—'}</div></div><div class="info-item"><div class="info-label">ပေးပို့သူ ဖုန်း</div><div class="info-value" style="font-size:12px">${d.sender_phone||'—'}</div></div><div class="info-item"><div class="info-label">လက်ခံသူ</div><div class="info-value">${d.recv_name||'—'}</div></div><div class="info-item"><div class="info-label">လက်ခံသူ ဖုန်း</div><div class="info-value" style="font-size:12px">${d.recv_phone||'—'}</div></div><div class="info-item"><div class="info-label">Destination</div><div class="info-value">${d.dest||'—'}</div></div><div class="info-item"><div class="info-label">Packing</div><div class="info-value">${d.packing||'—'}</div></div>${d.weight?`<div class="info-item"><div class="info-label">Weight</div><div class="info-value">${d.weight} kg</div></div>`:''}${d.qty?`<div class="info-item"><div class="info-label">Qty</div><div class="info-value">${d.qty}</div></div>`:''}<div class="info-item"><div class="info-label">Amount</div><div class="info-value" style="color:var(--accent)">${d.amount?Number(d.amount).toLocaleString()+' ကျပ်':'—'}</div></div><div class="info-item"><div class="info-label">Payment</div><div class="info-value">${pP}</div></div></div>${d.remark?`<div style="margin-top:10px;padding:10px;background:var(--card2);border-radius:10px;font-size:13px;color:var(--sub)">📝 ${d.remark}</div>`:''}</div>`;
+}
+function buildCommentsSection(){
+  if(!commentsData||commentsData.length===0)return '';
+  let html=`<div class="card"><div class="card-title">💬 Comments (${commentsData.length})</div>`;
+  commentsData.forEach(c=>{
+    const ini=(c.name||c.sender_name||'?').substring(0,2).toUpperCase();
+    const loc=c.location||c.step_label||c.city||null;
+    html+=`<div class="comment-item"><div class="comment-avatar">${ini}</div><div class="comment-bubble"><div class="comment-name">${c.name||c.sender_name||'User'}</div><div class="comment-text">${c.message||c.text||''}</div>${loc?`<div class="comment-location">📍 ${loc}</div>`:''}<div class="comment-time-small">${c.time?fmtDate(c.time):''}</div></div></div>`;
+  });
+  return html+'</div>';
+}
+function buildVoucherSection(curStep,curLabel){
+  const d=saiData||{};
+  return `<div class="card"><div class="card-title">🎫 Voucher / ဘောင်ချာ</div><div class="voucher"><div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><div style="background:linear-gradient(135deg,#1565C0,#0D47A1);width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff">SAI</div><div><div style="font-size:15px;font-weight:700">SAI Transport</div><div style="font-size:11px;color:var(--sub)">Tracking Voucher</div></div></div><div class="voucher-row"><span class="voucher-key">Tracking ID</span><span class="voucher-val" style="color:var(--accent);font-size:12px">${trackingId}</span></div><div class="voucher-row"><span class="voucher-key">Status</span><span class="voucher-val" style="color:${curStep>=12?'var(--blue)':'var(--accent)'}">${curStep>=12?'Delivered ✅':'In Transit 🚛'}</span></div><div class="voucher-row"><span class="voucher-key">ယခု တည်နေရာ</span><span class="voucher-val">${curLabel}</span></div>${d.sender_name?`<div class="voucher-row"><span class="voucher-key">ပေးပို့သူ</span><span class="voucher-val">${d.sender_name}</span></div>`:''}${d.recv_name?`<div class="voucher-row"><span class="voucher-key">လက်ခံသူ</span><span class="voucher-val">${d.recv_name}</span></div>`:''}<hr style="border:none;border-top:1px dashed var(--border);margin:12px 0"><div style="display:flex;justify-content:center;margin:12px 0"><div id="voucher-qr" style="background:#fff;padding:8px;border-radius:10px"></div></div><div style="text-align:center;font-size:10px;color:var(--sub);margin-top:6px">Scan to track • ${trackingId}</div></div><div class="btn-row"><button class="btn btn-secondary" onclick="window.print()">🖨 Print</button><button class="btn btn-secondary" onclick="shareLink()">🔗 Share</button></div></div>`;
+}
+function initMap(){
+  const el=document.getElementById('tracking-map'); if(!el)return;
+  if(leafletMap){try{leafletMap.remove();}catch(e){}leafletMap=null;driverMarker=null;}
+  const curStep=locationData?(locationData.current_step||0):0;
+  leafletMap=L.map('tracking-map',{zoomControl:true,scrollWheelZoom:false});
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap',maxZoom:18}).addTo(leafletMap);
+  const allC=ROUTE.map(r=>[r.lat,r.lng]);
+  L.polyline(allC,{color:'#2A2A5A',weight:2,dashArray:'5,5',opacity:.6}).addTo(leafletMap);
+  if(curStep>1){const dC=ROUTE.filter(r=>r.step<=curStep).map(r=>[r.lat,r.lng]);L.polyline(dC,{color:'#00E676',weight:3,opacity:.7}).addTo(leafletMap);}
+  const cityD={};
+  ROUTE.forEach(r=>{
+    if(cityD[r.city])return; cityD[r.city]=true;
+    const done=r.step<=curStep, active=r.step===curStep, sz=active?20:12;
+    const icon=L.divIcon({html:`<div style="width:${sz}px;height:${sz}px;border-radius:50%;background:${done||active?r.color:'#2A2A5A'};border:${active?3:2}px solid #fff;box-shadow:${active?'0 0 14px '+r.color+',0 0 6px #fff':'none'};transition:.3s"></div>`,className:'',iconAnchor:[sz/2,sz/2]});
+    L.marker([r.lat,r.lng],{icon}).addTo(leafletMap).bindPopup(`<b style="color:#000">${r.city}</b><br><span style="font-size:11px">${done&&!active?'✅ Done':active?'🚛 Now':'⏳ Pending'}</span>`);
+  });
+  updateDriverMarker();
+  leafletMap.fitBounds(L.latLngBounds(allC).pad(.15));
+}
+function updateDriverMarker(){
+  if(!leafletMap||!locationData)return;
+  const lat=locationData.driver_lat,lng=locationData.driver_lng; if(!lat||!lng)return;
+  if(driverMarker){driverMarker.setLatLng([lat,lng]);return;}
+  const icon=L.divIcon({html:`<div style="font-size:26px;filter:drop-shadow(0 0 8px #FFD600)">🚛</div>`,className:'',iconAnchor:[13,13]});
+  driverMarker=L.marker([lat,lng],{icon,zIndexOffset:1000}).addTo(leafletMap);
+  driverMarker.bindPopup(`<b style="color:#000">🚛 Driver တည်နေရာ</b>`);
+  leafletMap.setView([lat,lng],10);
+}
+function renderTimeline(curStep){
+  const container=document.getElementById('timeline-container'); if(!container)return;
+  const tlog=locationData&&locationData.timeline?locationData.timeline:{};
+  container.innerHTML='';
+  ROUTE.forEach(r=>{
+    const done=r.step<curStep, active=r.step===curStep, cls=done?'done':active?'active':'pending';
+    const entry=tlog[r.step]||tlog['step_'+r.step]||null;
+    const div=document.createElement('div'); div.className='tl-item';
+    div.innerHTML=`<div class="tl-dot ${cls}" style="${done||active?'background:'+r.color+';color:#000':''}">${done?'✓':active?'▶':r.step}</div><div class="tl-content ${cls}" style="${active?'border-left-color:'+r.color:''}"><div class="tl-label" style="color:${done||active?r.color:'var(--sub)'}">${r.label}</div>${entry&&entry.time?`<div class="tl-time">🕐 ${entry.time}</div>`:''}${entry&&entry.scanner?`<div class="tl-time">👤 ${entry.scanner}</div>`:''}<div class="tl-status" style="color:${done?'var(--accent)':active?r.color:'var(--sub)'}">${done?'✅ Done':active?'🚛 In this location':'⏳ Pending'}</div></div>`;
+    container.appendChild(div);
+  });
+}
+function drawVoucherQr(){
+  const el=document.getElementById('voucher-qr'); if(!el)return;
+  el.innerHTML='';
+  try{new QRCode(el,{text:'https://chai1548.github.io/Tracking/?id='+trackingId,width:120,height:120,colorDark:'#1A3A7A',colorLight:'#FFFFFF',correctLevel:QRCode.CorrectLevel.M});}
+  catch(e){el.textContent=trackingId;}
+}
+function renderHome(){
+  document.getElementById('header-sub').textContent='Parcel Tracking System';
+  document.getElementById('app-content').innerHTML=`
+    <div class="card" style="text-align:center;padding:28px 20px;background:linear-gradient(135deg,#0d1a2e,#1a1a3e);border-color:#1E3A5F">
+      <div style="width:64px;height:64px;background:linear-gradient(135deg,#e05c1a,#1565c0);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;color:#fff;margin:0 auto 12px;letter-spacing:2px;box-shadow:0 4px 20px rgba(224,92,26,.4)">SAI</div>
+      <h2 style="margin-bottom:6px;font-size:18px">SAI Transport Tracker</h2>
+      <p style="color:var(--sub);font-size:12px;margin-bottom:18px;line-height:1.6">Thailand → Myanmar ကုန်တင်ပို့ဝန်ဆောင်မှု<br>Tracking ID ဖြင့် Real-time စစ်ဆေးနိုင်သည်</p>
+      <div style="display:flex;gap:10px;max-width:320px;margin:0 auto">
+        <button class="btn btn-primary" style="flex:1;justify-content:center" onclick="showQrModal()">📷 QR Scan</button>
+        <button class="btn btn-secondary" style="flex:1;justify-content:center" onclick="document.getElementById('search-input').focus()">⌨️ ID ရိုက်ထည့်</button>
+      </div>
+    </div>
+    <div class="card"><div class="card-title">🛣 SAI Route</div>
+      <div style="display:flex;overflow-x:auto;gap:0;padding:4px 0;scrollbar-width:none">
+        ${[{icon:'🇹🇭',city:'Bangkok',color:'#FF1744'},{icon:'🔶',city:'မဲဆောက်',color:'#AA00FF'},{icon:'🛃',city:'မြဝတီ',color:'#E91E63'},{icon:'🏞',city:'ဘားအံ',color:'#2196F3'},{icon:'🌾',city:'ပဲခူး',color:'#FFD600'},{icon:'🏙',city:'ရန်ကုန်',color:'#4CAF50'},{icon:'🕌',city:'မန်လေး',color:'#FF9800'}].map((r,i,arr)=>`<div style="display:flex;align-items:center;flex-shrink:0"><div style="text-align:center;min-width:62px"><div style="font-size:20px;margin-bottom:3px">${r.icon}</div><div style="font-size:10px;font-weight:700;color:${r.color}">${r.city}</div></div>${i<arr.length-1?'<div style="color:var(--border);font-size:14px;padding:0 2px">→</div>':''}</div>`).join('')}
+      </div>
+    </div>
+    <div class="card"><div class="card-title">🗺 SAI Route Map</div><div id="tracking-map"></div><div class="map-legend"><div class="legend-item"><div class="legend-dot" style="background:#FF1744"></div>BKK</div><div class="legend-item"><div class="legend-dot" style="background:#AA00FF"></div>မဲဆောက်</div><div class="legend-item"><div class="legend-dot" style="background:#E91E63"></div>မြဝတီ</div><div class="legend-item"><div class="legend-dot" style="background:#2196F3"></div>ဘားအံ</div><div class="legend-item"><div class="legend-dot" style="background:#FFD600"></div>ပဲခူး</div><div class="legend-item"><div class="legend-dot" style="background:#4CAF50"></div>ရန်ကုန်</div><div class="legend-item"><div class="legend-dot" style="background:#FF9800"></div>မန်လေး</div></div></div>
+    <div class="card" style="background:linear-gradient(135deg,#0a1628,#0d1a2e);border-color:#1E3A5F"><div class="card-title">📞 ဆက်သွယ်ရန်</div><div style="line-height:2;font-size:13px;color:var(--sub)"><div style="color:var(--text);font-weight:700;margin-bottom:6px">ရန်ကုန် – (၃၀၀)(က)သိရိမောဟာလမ်း (ဂ)ရပ်ကွက် တောင်ဥက္ကလာပ</div><div>📱 09774904060</div><div>📱 09941287963</div><div>📱 09454904060</div><div>📱 09456222088</div><div style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);color:var(--accent);font-weight:700">📞 MAQ Office: 083 494 4787</div><div style="font-size:11px;color:var(--sub);margin-top:4px">Ph: 1565</div></div></div>`;
+  requestAnimationFrame(()=>{
+    if(leafletMap){leafletMap.remove();leafletMap=null;}
+    leafletMap=L.map('tracking-map',{zoomControl:true,scrollWheelZoom:false});
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'',maxZoom:18}).addTo(leafletMap);
+    const coords=ROUTE.map(r=>[r.lat,r.lng]);
+    L.polyline(coords,{color:'#2979FF',weight:3,dashArray:'8,8',opacity:.7}).addTo(leafletMap);
+    const shown={};
+    ROUTE.forEach(r=>{if(shown[r.city])return;shown[r.city]=true;L.circleMarker([r.lat,r.lng],{radius:7,color:r.color,fillColor:r.color,fillOpacity:.85,weight:2}).addTo(leafletMap).bindPopup(`<b style="color:#000">${r.city}</b>`);});
+    leafletMap.fitBounds(L.latLngBounds(coords).pad(.15));
+  });
+}
+function setRating(r){currentRating=r;document.querySelectorAll('.star').forEach((s,i)=>s.classList.toggle('active',i<r));}
+function submitFeedback(){
+  if(!trackingId)return showToast('Tracking ID မရှိပါ');
+  if(!currentRating)return showToast('Star ရွေးပါ');
+  const text=document.getElementById('feedback-text').value.trim();
+  if(!text)return showToast('မှတ်ချက် ရေးပါ');
+  db.ref('feedbacks/'+trackingId).push({rating:currentRating,text,created_at:firebase.database.ServerValue.TIMESTAMP})
+    .then(()=>{document.getElementById('feedback-text').value='';setRating(0);showToast('✅ Feedback တင်ပြီးပါပြီ');});
+}
+function loadFeedbacks(){
+  if(!trackingId)return;
+  db.ref('feedbacks/'+trackingId).once('value',snap=>{
+    const c=document.getElementById('feedback-list');
+    if(!c||!snap.exists())return;
+    const arr=[];snap.forEach(ch=>arr.push(ch.val()));
+    arr.sort((a,b)=>(b.created_at||0)-(a.created_at||0));
+    c.innerHTML=arr.map(f=>`<div class="feedback-item-dark"><div style="color:var(--yellow)">${'★'.repeat(f.rating||0)}${'☆'.repeat(5-(f.rating||0))}</div><div style="font-size:13px;margin-top:4px">${f.text||''}</div><div style="font-size:10px;color:var(--sub);margin-top:4px">${f.created_at?fmtDate(new Date(f.created_at)):''}</div></div>`).join('');
+  });
+}
+function showQrModal(){
+  document.getElementById('qr-modal').classList.remove('hidden');
+  setTimeout(()=>{
+    const c=document.getElementById('qr-reader-container');
+    c.innerHTML='<div id="qr-reader" style="width:100%"></div>';
+    try{
+      html5QrCode=new Html5Qrcode('qr-reader');
+      html5QrCode.start({facingMode:'environment'},{fps:10,qrbox:220},
+        text=>{html5QrCode.stop();closeQrModal();document.getElementById('search-input').value=text;trackingId=text;history.pushState({},'','?id='+text);loadAll(text);}
+      ).catch(()=>{c.innerHTML='<p style="color:var(--sub);text-align:center;padding:20px">Camera ဖွင့်မရပါ</p>';});
+    }catch(e){}
+  },200);
+}
+function closeQrModal(){
+  document.getElementById('qr-modal').classList.add('hidden');
+  if(html5QrCode){try{html5QrCode.stop();}catch(e){}html5QrCode=null;}
+  document.getElementById('qr-reader-container').innerHTML='';
+}
+function shareLink(){
+  const url=location.href;
+  if(navigator.share)navigator.share({title:'SAI Tracking',text:'KST: '+trackingId,url});
+  else{navigator.clipboard.writeText(url).then(()=>showToast('🔗 Link ကူးပြီးပါပြီ'));}
+}
+
+// ════════════════════════════════════════════
+// ════  TAB 2 — POST TRACKING  ════
+// ════════════════════════════════════════════
+let ptTrackingId=null, ptPostKey=null, ptTrackingData={}, ptPostData={};
+let ptCurrentRating=0, ptSelectedFiles=[], ptCurrentUserId='user_'+Math.random().toString(36).substr(2,9);
+let lbImages=[], lbIndex=0;
+
+function ptDoSearch(){
+  const v=document.getElementById('pt-search-input').value.trim();
+  if(!v)return showToast('Tracking ID ထည့်ပါ');
+  ptTrackingId=v; ptLoadData(v);
+}
+
+function ptLoadData(id){
+  document.getElementById('pt-app-content').innerHTML='<div class="loader"><div class="spinner"></div><p style="color:var(--sub)">Loading...</p></div>';
+
+  // ── Step 1: tracking/ node မှာ ရှာ ──────────────────────────
+  db.ref('tracking/'+id).once('value',snap=>{
+    if(snap.exists()){
+      ptTrackingData=snap.val(); ptPostKey=ptTrackingData.post_key||null;
+      _ptFinishLoad(id);
+      return;
+    }
+
+    // ── Step 2: posts/ node မှာ တိုက်ရိုက် ရှာ (QR key = post key) ──
+    db.ref('posts/'+id).once('value',ps=>{
+      if(ps.exists()){
+        ptPostData=ps.val();
+        ptPostKey=id;
+        ptTrackingData={post_key:id, status:'Active'};
+        // sai_vouchers/ မှာပါ ဆွဲ
+        db.ref('sai_vouchers/'+id).once('value',sv=>{
+          if(sv.exists())Object.assign(ptTrackingData, sv.val());
+          ptRenderAll(id);
+          ptLoadComments(id);
+          ptLoadAdminFeedback(id);
+          ptLoadImages(id);
+          ptLoadFeedbacks(id);
+          ptUpdateTracking(id);
+        });
+        return;
+      }
+
+      // ── Step 3: sai_vouchers/ မှာ ရှာ ──────────────────────
+      db.ref('sai_vouchers/'+id).once('value',sv=>{
+        if(sv.exists()){
+          ptTrackingData=sv.val(); ptPostKey=null; ptPostData={};
+          ptRenderAll(id);
+          ptLoadAdminFeedback(id);
+          ptLoadImages(id);
+          ptLoadFeedbacks(id);
+          ptUpdateTracking(id);
+          return;
+        }
+
+        // ── မတွေ့ပါ ──
+        document.getElementById('pt-app-content').innerHTML=
+          `<div class="card" style="text-align:center;padding:40px">
+            <div style="font-size:50px;margin-bottom:12px">🔍</div>
+            <p style="color:var(--sub)">Tracking ID မတွေ့ပါ</p>
+            <p style="color:var(--accent);font-weight:700;margin-top:6px">${id}</p>
+            <p style="color:var(--sub);font-size:12px;margin-top:6px">posts/ · tracking/ · sai_vouchers/ မှာ မရှိပါ</p>
+          </div>`;
+      });
+    });
+  });
+}
+
+function _ptFinishLoad(id){
+  if(ptPostKey){
+    db.ref('posts/'+ptPostKey).once('value',ps=>{
+      ptPostData=ps.exists()?ps.val():{};
+      ptRenderAll(id);
+      ptLoadComments(ptPostKey);
+      ptLoadAdminFeedback(id);
+      ptLoadImages(id);
+      ptLoadFeedbacks(id);
+      ptUpdateTracking(id);
+      db.ref('tracking/'+id).on('value',s=>{if(s.exists())ptTrackingData=s.val();});
+    });
+  } else {
+    ptPostData={};
+    ptRenderAll(id);
+    ptLoadAdminFeedback(id);
+    ptLoadImages(id);
+    ptLoadFeedbacks(id);
+    ptUpdateTracking(id);
+  }
+}
+
+function ptRenderAll(id){
+  const d=ptTrackingData, post=ptPostData;
+  let html='';
+
+  // ── POST CONTENT (ဟင် style — white card) ───────────────────────
+  if(post&&(post.data||post.video_url||post.description)){
+    html+=`
+    <div style="background:#f7fafc;border-radius:16px;padding:20px;margin-bottom:16px;border:2px solid #e2e8f0">
+      <h3 style="color:#2d3748;margin-bottom:14px;display:flex;align-items:center;gap:8px;font-size:15px">📄 Post Content</h3>`;
+
+    let mediaItems=[];
+    if(post.video_url&&post.video_url!=='null')mediaItems.push({type:'video',url:post.video_url});
+    if(post.data&&post.data!=='null'){
+      let imgs=[];try{imgs=JSON.parse(post.data);if(!Array.isArray(imgs))imgs=[post.data];}catch(e){imgs=[post.data];}
+      imgs.forEach(u=>{
+        if(u.includes('.mp4')||u.includes('.webm')||u.includes('video'))mediaItems.push({type:'video',url:u});
+        else mediaItems.push({type:'image',url:u});
+      });
+    }
+    window._ptMediaItems=mediaItems;
+
+    if(mediaItems.length>0){
+      html+=`<div style="width:100%;background:#000;border-radius:12px;overflow:hidden;margin-bottom:14px">
+        <div class="swiper" id="ptSwiper" style="height:300px"><div class="swiper-wrapper">`;
+      mediaItems.forEach((m,i)=>{
+        html+=`<div class="swiper-slide" style="display:flex;align-items:center;justify-content:center;background:#000">`;
+        if(m.type==='video')html+=`<video controls playsinline controlsList="nodownload" style="max-width:100%;max-height:300px"><source src="${m.url}" type="video/mp4"></video>`;
+        else html+=`<img src="${m.url}" onclick="lbOpen(${i},'pt')" style="max-width:100%;max-height:300px;object-fit:contain;cursor:pointer">`;
+        html+=`</div>`;
+      });
+      html+=`</div>`;
+      if(mediaItems.length>1)html+=`<div class="swiper-pagination"></div><div class="swiper-button-prev"></div><div class="swiper-button-next"></div>`;
+      html+=`</div></div>`;
+
+      if(mediaItems.length>1){
+        const imgC=mediaItems.filter(m=>m.type==='image').length;
+        const vidC=mediaItems.filter(m=>m.type==='video').length;
+        let txt=[];if(imgC>0)txt.push(`📷 ${imgC} Photo${imgC>1?'s':''}`);if(vidC>0)txt.push(`🎥 ${vidC} Video${vidC>1?'s':''}`);
+        html+=`<div style="text-align:center;color:#64748b;font-size:13px;margin-top:8px;font-weight:600">${txt.join(' • ')}</div>`;
+      }
+    }
+
+    if(post.description){
+      html+=`<div style="padding:14px;background:#fff;border-radius:8px;margin-top:12px">
+        <div style="color:#4a5568;font-size:13px;font-weight:600;margin-bottom:6px">Description:</div>
+        <p style="color:#2d3748;line-height:1.6;font-size:14px">${post.description}</p>
+      </div>`;
+    }
+
+    const lk=post.likes?Object.keys(post.likes).length:0;
+    const cm=post.comments?(typeof post.comments==='number'?post.comments:Object.keys(post.comments).length):0;
+    html+=`<div style="display:flex;gap:18px;margin-top:12px;padding:12px;background:#fff;border-radius:8px">
+      <div style="display:flex;align-items:center;gap:5px;color:#64748b;font-size:14px">❤️ <span style="font-weight:700;color:#1e293b">${lk}</span> Likes</div>
+      <div style="display:flex;align-items:center;gap:5px;color:#64748b;font-size:14px">💬 <span style="font-weight:700;color:#1e293b">${cm}</span> Comments</div>
+    </div>`;
+    html+=`</div>`;
+  }
+
+  // ── TRACKING INFO (light blue style like reference) ──────────────
+  html+=`<div style="background:linear-gradient(135deg,#e0f2fe,#bfdbfe);border-radius:16px;padding:20px;margin-bottom:16px;border-left:5px solid #0284c7">
+    <h3 style="color:#075985;margin-bottom:14px;display:flex;align-items:center;gap:8px;font-size:16px">🚚 Tracking Information</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+      <div style="background:#fff;padding:14px;border-radius:10px;box-shadow:0 2px 4px rgba(0,0,0,.05)"><div style="color:#64748b;font-size:11px;margin-bottom:4px;font-weight:600;text-transform:uppercase">Tracking ID</div><div style="color:#1e293b;font-size:14px;font-weight:700;word-break:break-all">${id}</div></div>
+      <div style="background:#fff;padding:14px;border-radius:10px;box-shadow:0 2px 4px rgba(0,0,0,.05)"><div style="color:#64748b;font-size:11px;margin-bottom:4px;font-weight:600;text-transform:uppercase">Status</div><div style="color:#1e293b;font-size:14px;font-weight:700">${d.status||'Active'}</div></div>
+      <div style="background:#fff;padding:14px;border-radius:10px;box-shadow:0 2px 4px rgba(0,0,0,.05)"><div style="color:#64748b;font-size:11px;margin-bottom:4px;font-weight:600;text-transform:uppercase">Views</div><div style="color:#1e293b;font-size:14px;font-weight:700">${d.views||0} 👁️</div></div>
+      <div style="background:#fff;padding:14px;border-radius:10px;box-shadow:0 2px 4px rgba(0,0,0,.05)"><div style="color:#64748b;font-size:11px;margin-bottom:4px;font-weight:600;text-transform:uppercase">Location</div><div style="color:#1e293b;font-size:14px;font-weight:700">${d.last_location||'Unknown'}</div></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button onclick="ptShare()" style="flex:1;min-width:100px;padding:11px 16px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer">📤 Share</button>
+    </div>
+  </div>`;
+
+  // ── Containers ───────────────────────────────────────────────────
+  html+=`<div id="pt-images-container"></div>`;
+
+  // Comments (light blue style)
+  if(ptPostKey){
+    html+=`<div style="background:#f0f9ff;border-radius:16px;padding:20px;margin-bottom:16px;border-left:5px solid #3b82f6">
+      <h3 style="color:#1e40af;margin-bottom:14px;display:flex;align-items:center;gap:8px;font-size:16px">💬 Comments</h3>
+      <div id="pt-comments-list"><p style="text-align:center;color:#9ca3af;padding:20px">Loading...</p></div>
+    </div>`;
+  }
+
+  // Customer Feedback (light green style)
+  html+=`<div style="background:linear-gradient(135deg,#dcfce7,#bbf7d0);border-radius:16px;padding:20px;margin-bottom:16px;border-left:5px solid #16a34a">
+    <h3 style="color:#166534;margin-bottom:14px;display:flex;align-items:center;gap:8px;font-size:16px">⭐ Customer Feedback</h3>
+    <div id="pt-feedback-list"></div>
+    <div style="background:#fff;padding:18px;border-radius:12px;margin-top:16px">
+      <h4 style="color:#1e293b;margin-bottom:12px;font-size:14px">Leave Your Feedback</h4>
+      <div style="display:flex;gap:8px;justify-content:center;margin-bottom:12px" id="pt-star-row">
+        ${[1,2,3,4,5].map(i=>`<span class="pt-star" onclick="ptSetRating(${i})" style="font-size:30px;cursor:pointer;color:#cbd5e1;transition:.2s">★</span>`).join('')}
+      </div>
+      <textarea id="pt-feedback-text" placeholder="Share your experience..." style="width:100%;padding:12px;border:2px solid #e2e8f0;border-radius:10px;font-size:14px;font-family:inherit;resize:vertical;min-height:90px;outline:none"></textarea>
+      <button onclick="ptSubmitFeedback()" style="width:100%;margin-top:10px;padding:12px;background:#10b981;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">Submit Feedback</button>
+    </div>
+  </div>`;
+
+  // Admin / Location Updates (yellow style)
+  html+=`<div style="background:linear-gradient(135deg,#fef3c7,#fde68a);border-radius:16px;padding:20px;margin-bottom:16px;border-left:5px solid #f59e0b">
+    <h3 style="color:#92400e;margin-bottom:14px;display:flex;align-items:center;gap:8px;font-size:16px">📍 Location Updates</h3>
+    <div id="pt-admin-list"></div>
+  </div>`;
+
+  // Upload section
+  if(d.image_upload_enabled!==false){
+    html+=`<div style="background:#fff;border:2px solid #e2e8f0;border-radius:16px;padding:20px;margin-bottom:16px">
+      <h4 style="color:#1e293b;margin-bottom:14px;font-size:15px">📸 Upload Images</h4>
+      <label style="display:block;padding:12px;background:#667eea;color:#fff;border-radius:10px;text-align:center;font-weight:700;font-size:13px;cursor:pointer">
+        📂 Choose Images / Videos
+        <input type="file" multiple accept="image/*,video/*" style="display:none" onchange="ptHandleFiles(event)">
+      </label>
+      <div class="pt-img-preview" id="pt-preview" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;margin-top:10px"></div>
+      <div id="pt-upload-btn-wrap" style="display:none;margin-top:10px">
+        <button onclick="ptUpload()" id="pt-upload-btn" style="width:100%;padding:12px;background:#10b981;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">⬆️ Upload</button>
+      </div>
+    </div>`;
+  }
+
+  document.getElementById('pt-app-content').innerHTML=html;
+  setTimeout(()=>{
+    const s=document.getElementById('ptSwiper');
+    if(s)new Swiper('#ptSwiper',{
+      slidesPerView:1,
+      pagination:{el:'.swiper-pagination',clickable:true},
+      navigation:{nextEl:'.swiper-button-next',prevEl:'.swiper-button-prev'},
+      on:{slideChange(){document.querySelectorAll('#ptSwiper video').forEach(v=>v.pause());}}
+    });
+  },100);
+}
+
+function ptLoadComments(postKey){
+  db.ref('posts/'+postKey+'/comments').on('value',snap=>{
+    const c=document.getElementById('pt-comments-list'); if(!c)return;
+    if(!snap.exists()){c.innerHTML='<p style="color:var(--sub);font-size:13px">No comments yet</p>';return;}
+    const arr=[];snap.forEach(ch=>arr.push({key:ch.key,...ch.val()}));
+    arr.sort((a,b)=>(b.timestamp||0)-(a.timestamp||0));
+    c.innerHTML=arr.map(cm=>{
+      const ini=(cm.username||cm.uid||'?').charAt(0).toUpperCase();
+      const av=cm.profile_img
+        ?`<div style="width:36px;height:36px;border-radius:50%;overflow:hidden;flex-shrink:0"><img src="${cm.profile_img}" style="width:100%;height:100%;object-fit:cover"></div>`
+        :`<div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;flex-shrink:0">${ini}</div>`;
+      const img_url=cm.img_url?`<div style="margin-top:8px"><img src="${cm.img_url}" style="max-width:100%;border-radius:8px;max-height:200px;object-fit:contain" onclick="lbOpen(0,'comment_${cm.img_url}')"></div>`:'';
+      return `<div style="background:#fff;padding:14px;border-radius:10px;margin-bottom:10px;box-shadow:0 2px 4px rgba(0,0,0,.05)">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          ${av}
+          <div style="flex:1"><div style="font-weight:600;color:#1f2937;font-size:14px">${cm.username||'Anonymous'}</div>
+          <div style="color:#9ca3af;font-size:11px">${cm.time||cm.timestamp?ptFmtDate(new Date(cm.time||cm.timestamp)):''}</div></div>
+        </div>
+        <div style="color:#374151;line-height:1.6;font-size:14px">${cm.message||cm.comment||cm.text||''}</div>
+        ${img_url}
+      </div>`;
+    }).join('');
+  });
+}
+function ptLoadAdminFeedback(id){
+  db.ref('location_notes/'+id).on('value',snap=>{
+    const c=document.getElementById('pt-admin-list'); if(!c)return;
+    if(!snap.exists()){c.innerHTML='<p style="color:var(--sub);font-size:13px;text-align:center;padding:14px">No location updates yet</p>';return;}
+    const arr=[];snap.forEach(ch=>arr.push({key:ch.key,...ch.val()}));
+    arr.sort((a,b)=>(b.timestamp||0)-(a.timestamp||0));
+    c.innerHTML=arr.map(n=>`<div style="background:#fff;padding:14px;border-radius:10px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="background:#f59e0b;color:#fff;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700">ADMIN</span>
+        <span style="color:#9ca3af;font-size:11px">${n.timestamp?ptFmtDate(new Date(n.timestamp)):''}</span>
+      </div>
+      <div style="color:#1f2937;line-height:1.5;font-size:14px">${n.note||n.text||''}</div>
+    </div>`).join('');
+  });
+}
+function ptLoadImages(id){
+  db.ref('tracking_images/'+id).on('value',snap=>{
+    const c=document.getElementById('pt-images-container'); if(!c)return;
+    if(!snap.exists()){c.innerHTML='';return;}
+    const arr=[];snap.forEach(ch=>arr.push({key:ch.key,...ch.val()}));
+    arr.sort((a,b)=>(b.uploaded_at||0)-(a.uploaded_at||0));
+    window._ptGalleryImages=arr;
+    let html=`<div style="background:#fef3c7;border-radius:16px;padding:20px;margin-bottom:16px;border-left:5px solid #f59e0b"><h3 style="color:#92400e;margin-bottom:14px;display:flex;align-items:center;gap:8px;font-size:16px">🖼️ Photos & Videos (${arr.length})</h3><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px">`;
+    arr.forEach((img,i)=>{
+      const isV=img.type&&img.type.startsWith('video/');
+      const date=img.uploaded_at?ptFmtDate(new Date(img.uploaded_at)):'';
+      html+=`<div style="position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;cursor:pointer;transition:transform .2s;box-shadow:0 2px 8px rgba(0,0,0,.1)" onclick="lbOpen(${i},'gallery')" onmouseenter="this.style.transform='scale(1.04)'" onmouseleave="this.style.transform='scale(1)'">`;
+      if(isV)html+=`<video src="${img.url}" muted style="width:100%;height:100%;object-fit:cover"></video><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;background:rgba(0,0,0,.6);border-radius:50%;display:flex;align-items:center;justify-content:center;pointer-events:none"><span style="color:#fff;font-size:18px;margin-left:2px">▶</span></div>`;
+      else html+=`<img src="${img.url}" loading="lazy" style="width:100%;height:100%;object-fit:cover">`;
+      html+=`<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.7));color:#fff;padding:8px;font-size:10px">${date}</div></div>`;
+    });
+    html+=`</div></div>`;
+    c.innerHTML=html;
+  });
+}
+function ptLoadFeedbacks(id){
+  db.ref('feedbacks/'+id).on('value',snap=>{
+    const c=document.getElementById('pt-feedback-list'); if(!c)return;
+    if(!snap.exists()){c.innerHTML='<p style="color:var(--sub);font-size:13px;text-align:center;padding:14px">No feedback yet</p>';return;}
+    const arr=[];snap.forEach(ch=>arr.push(ch.val()));
+    arr.sort((a,b)=>(b.created_at||0)-(a.created_at||0));
+    c.innerHTML=arr.map(f=>`<div style="background:#fff;padding:14px;border-radius:10px;margin-bottom:10px;box-shadow:0 2px 4px rgba(0,0,0,.05)">
+      <div style="color:#f59e0b;font-size:16px;margin-bottom:6px">${'★'.repeat(Math.min(5,f.rating||0))}${'☆'.repeat(5-Math.min(5,f.rating||0))}</div>
+      <div style="color:#374151;line-height:1.6;font-size:14px;margin-bottom:6px">${f.text||''}</div>
+      <div style="color:#9ca3af;font-size:11px">${f.created_at?ptFmtDate(new Date(f.created_at)):''}</div>
+    </div>`).join('');
+  });
+}
+function ptSetRating(r){ptCurrentRating=r;document.querySelectorAll('.pt-star').forEach((s,i)=>s.classList.toggle('active',i<r));}
+function ptSubmitFeedback(){
+  const text=document.getElementById('pt-feedback-text').value.trim();
+  if(!ptCurrentRating)return showToast('Rating ရွေးပါ');
+  if(!text)return showToast('Feedback ရေးပါ');
+  db.ref('feedbacks/'+ptTrackingId).push({rating:ptCurrentRating,text,user_id:ptCurrentUserId,created_at:firebase.database.ServerValue.TIMESTAMP})
+    .then(()=>{document.getElementById('pt-feedback-text').value='';ptSetRating(0);showToast('✅ Feedback တင်ပြီး');});
+}
+function ptHandleFiles(e){
+  ptSelectedFiles=Array.from(e.target.files);
+  const prev=document.getElementById('pt-preview');
+  const wrap=document.getElementById('pt-upload-btn-wrap');
+  if(!prev)return;
+  prev.innerHTML='';
+  ptSelectedFiles.forEach((f,i)=>{
+    const r=new FileReader();
+    r.onload=ev=>{
+      const d=document.createElement('div'); d.className='pt-preview-item';
+      const isV=f.type.startsWith('video/');
+      d.innerHTML=isV?`<video src="${ev.target.result}" muted></video><button class="pt-preview-remove" onclick="ptRemoveFile(${i})">×</button>`:`<img src="${ev.target.result}"><button class="pt-preview-remove" onclick="ptRemoveFile(${i})">×</button>`;
+      prev.appendChild(d);
+    };
+    r.readAsDataURL(f);
+  });
+  if(wrap)wrap.style.display=ptSelectedFiles.length?'flex':'none';
+  const btn=document.getElementById('pt-upload-btn');
+  if(btn)btn.textContent=`⬆️ Upload ${ptSelectedFiles.length} File(s)`;
+}
+function ptRemoveFile(i){ptSelectedFiles.splice(i,1);const e={target:{files:ptSelectedFiles}};ptHandleFiles(e);}
+function ptUpload(){
+  if(!ptSelectedFiles.length)return showToast('File ရွေးပါ');
+  const btn=document.getElementById('pt-upload-btn');
+  if(btn){btn.disabled=true;btn.textContent='Uploading...';}
+  let done=0;
+  ptSelectedFiles.forEach(f=>{
+    const ts=Date.now();
+    const ref=storage.ref('tracking_images/'+ptTrackingId+'_'+ts+'_'+f.name);
+    ref.put(f).then(s=>s.ref.getDownloadURL()).then(url=>{
+      return db.ref('tracking_images/'+ptTrackingId).push({url,name:f.name,type:f.type,uploaded_by:ptCurrentUserId,uploaded_at:firebase.database.ServerValue.TIMESTAMP});
+    }).then(()=>{
+      done++;
+      if(done===ptSelectedFiles.length){
+        ptSelectedFiles=[];
+        document.getElementById('pt-preview').innerHTML='';
+        const w=document.getElementById('pt-upload-btn-wrap');if(w)w.style.display='none';
+        if(btn){btn.disabled=false;btn.textContent='⬆️ Upload';}
+        showToast('✅ Upload ပြီး');
+      }
+    }).catch(e=>showToast('Upload error: '+e.message));
+  });
+}
+function ptUpdateTracking(id){
+  // Save to tracking/{id}: views increment + last_scan_at + location
+  const upd={
+    views: firebase.database.ServerValue.increment(1),
+    last_scan_at: firebase.database.ServerValue.TIMESTAMP,
+    tracking_url: 'https://chai1548.github.io/Tracking/?id='+id
+  };
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(
+      p=>{
+        upd.last_location=p.coords.latitude.toFixed(4)+', '+p.coords.longitude.toFixed(4);
+        db.ref('tracking/'+id).update(upd);
+      },
+      ()=>{
+        upd.last_location='Location unavailable';
+        db.ref('tracking/'+id).update(upd);
+      }
+    );
+  }else{
+    db.ref('tracking/'+id).update(upd);
+  }
+}
+function ptShare(){
+  const url=location.href;
+  if(navigator.share)navigator.share({title:'Post Tracking',url});
+  else{navigator.clipboard.writeText(url);showToast('🔗 Link ကူးပြီး');}
+}
+function ptFmtDate(d){return d.toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});}
+
+// ════════════════════════════════════════════
+// LIGHTBOX (shared)
+// ════════════════════════════════════════════
+function lbOpen(index, source){
+  let items=[];
+  if(source==='pt')items=(window._ptMediaItems||[]);
+  else if(source==='gallery')items=(window._ptGalleryImages||[]).map(i=>({type:i.type&&i.type.startsWith('video/')?'video':'image',url:i.url}));
+  if(!items.length)return;
+  lbImages=items; lbIndex=index;
+  lbShow();
+  document.getElementById('lbModal').classList.add('active');
+  document.addEventListener('keydown',lbKey);
+}
+function lbShow(){
+  const m=lbImages[lbIndex];
+  const img=document.getElementById('lbImg'), vid=document.getElementById('lbVideo');
+  if(m.type==='video'){img.style.display='none';vid.style.display='block';vid.querySelector('source').src=m.url;vid.load();vid.play();}
+  else{vid.style.display='none';img.style.display='block';img.src=m.url;}
+  const c=document.getElementById('lbCounter');
+  c.style.display=lbImages.length>1?'block':'none';
+  c.textContent=(lbIndex+1)+' / '+lbImages.length;
+  document.getElementById('lbPrev').style.display=lbImages.length>1?'block':'none';
+  document.getElementById('lbNext').style.display=lbImages.length>1?'block':'none';
+}
+function lbNav(d){
+  lbIndex=(lbIndex+d+lbImages.length)%lbImages.length; lbShow();
+}
+function lbClose(){
+  document.getElementById('lbModal').classList.remove('active');
+  const v=document.getElementById('lbVideo'); if(!v.paused)v.pause();
+  document.removeEventListener('keydown',lbKey);
+}
+function lbKey(e){if(e.key==='ArrowLeft')lbNav(-1);else if(e.key==='ArrowRight')lbNav(1);else if(e.key==='Escape')lbClose();}
+function lbSave(){
+  const url=lbImages[lbIndex]&&lbImages[lbIndex].url;
+  if(!url)return;
+  fetch(url).then(r=>r.blob()).then(b=>{
+    const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='image_'+Date.now()+'.jpg';a.click();
+  }).catch(()=>window.open(url,'_blank'));
+}
+
+// ════════════════════════════════════════════
+// SHARED UTILS
+// ════════════════════════════════════════════
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+function fmtDate(v){
+  try{const d=typeof v==='number'?new Date(v):new Date(v);return d.toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});}catch(e){return v||'';}
+}
+</script>
+</body>
+</html>
